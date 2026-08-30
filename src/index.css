@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+@theme {
+  /* Cooperative Green Palette */
+  --color-coop-50: #ecfdf5;
+  --color-coop-100: #d1fae5;
+  --color-coop-200: #a7f3d0;
+  --color-coop-300: #6ee7b7;
+  --color-coop-400: #34d399;
+  --color-coop-500: #10b981;
+  --color-coop-600: #059669;
+  --color-coop-700: #047857;
+  --color-coop-800: #065f46;
+  --color-coop-900: #064e3b;
+  --color-coop-950: #022c22;
+
+  /* Surface / Neutral Palette */
+  --color-surface-50: #fafaf9;
+  --color-surface-100: #f5f5f4;
+  --color-surface-200: #e7e5e4;
+  --color-surface-300: #d6d3d1;
+  --color-surface-400: #a8a29e;
+  --color-surface-500: #78716c;
+  --color-surface-600: #57534e;
+  --color-surface-700: #44403c;
+  --color-surface-800: #292524;
+  --color-surface-900: #1c1917;
+  --color-surface-950: #0c0a09;
+
+  /* Accent / Emergency palette */
+  --color-accent-400: #f97316;
+  --color-accent-500: #ea580c;
+  --color-accent-600: #c2410c;
+
+  /* Typography */
+  --font-family-display: 'Plus Jakarta Sans', sans-serif;
+  --font-family-sans: 'Inter', sans-serif;
+
+  /* Custom Shadows */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-elevated: 0 4px 24px rgba(6,78,59,0.12), 0 1px 4px rgba(0,0,0,0.08);
+
+  /* Border radius extras */
+  --radius-4xl: 2rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Base styles */
+html {
+  font-family: 'Inter', sans-serif;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #fafaf9;
+  color: #0f172a;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-dark {
+  background: rgba(6, 78, 59, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom shadows as CSS utilities */
+.shadow-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.shadow-elevated {
+  box-shadow: 0 4px 24px rgba(6,78,59,0.12), 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* Font display utility */
+.font-display {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+.animate-fade-in   { animation: fadeIn   0.4s ease-out both; }
+.animate-slide-in  { animation: slideIn  0.3s ease-out both; }
+.animate-pulse-soft{ animation: pulse-soft 2s ease-in-out infinite; }
+.animate-float     { animation: float 3s ease-in-out infinite; }
