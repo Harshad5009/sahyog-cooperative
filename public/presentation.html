@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAHYOG — SIH 2026 PS-89 Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #16a34a;
+      --green-dark: #14532d;
+      --green-light: #dcfce7;
+      --green-mid: #22c55e;
+      --gray-900: #111827;
+      --gray-700: #374151;
+      --gray-500: #6b7280;
+      --gray-100: #f3f4f6;
+      --white: #ffffff;
+      --accent: #fbbf24;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ─── Slide Container ─── */
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateX(60px);
+      transition: all 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      padding: 48px 64px;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: all;
+    }
+
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    /* ─── SLIDE 1: Title ─── */
+    #slide-1 {
+      background: linear-gradient(135deg, #052e16 0%, #064e3b 40%, #065f46 100%);
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .s1-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #86efac;
+      letter-spacing: 0.05em;
+      margin-bottom: 28px;
+    }
+
+    .s1-badge span { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; animation: pulse 1.5s infinite; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .s1-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(48px, 7vw, 80px);
+      font-weight: 900;
+      color: white;
+      line-height: 1.05;
+      margin-bottom: 8px;
+    }
+
+    .s1-subtitle {
+      font-size: clamp(18px, 2.5vw, 26px);
+      font-weight: 700;
+      color: #4ade80;
+      margin-bottom: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .s1-tagline {
+      font-size: 15px;
+      color: rgba(255,255,255,0.65);
+      font-style: italic;
+      margin-bottom: 40px;
+    }
+
+    .s1-meta {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 12px 40px;
+    }
+
+    .s1-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .s1-meta-item .label { font-size: 10px; font-weight: 700; color: #4ade80; letter-spacing: 0.1em; text-transform: uppercase; }
+    .s1-meta-item .value { font-size: 15px; font-weight: 600; color: white; }
+
+    .s1-right {
+      position: absolute;
+      right: 64px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .s1-stat {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 20px 28px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .s1-stat .num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 900; color: #4ade80; }
+    .s1-stat .lbl { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500; margin-top: 2px; }
+
+    .sih-logo {
+      position: absolute;
+      bottom: 40px;
+      right: 64px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-align: right;
+    }
+
+    /* ─── Slide Header (slides 2-6) ─── */
+    .slide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-shrink: 0;
+    }
+
+    .slide-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .slide-number {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .slide-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(24px, 3.5vw, 40px);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .slide-subtitle {
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.7;
+    }
+
+    /* ─── SLIDE 2: Solution ─── */
+    #slide-2 {
+      background: linear-gradient(160deg, #f0fdf4 0%, #ffffff 60%, #fefce8 100%);
+    }
+
+    #slide-2 .slide-title { color: var(--gray-900); }
+    #slide-2 .slide-label { color: var(--green); }
+    #slide-2 .slide-subtitle { color: var(--gray-500); }
+
+    .capability-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .cap-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      border: 1.5px solid #e5e7eb;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      transition: border-color 0.2s;
+    }
+
+    .cap-card:hover { border-color: var(--green); }
+
+    .cap-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .cap-card h4 { font-size: 12px; font-weight: 800; color: var(--gray-900); margin-bottom: 4px; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .cap-card p { font-size: 11px; color: var(--gray-500); line-height: 1.5; }
+
+    .uniqueness-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .unique-pill {
+      background: var(--green);
+      color: white;
+      border-radius: 12px;
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .unique-pill .num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 900; }
+    .unique-pill .lbl { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+
+    /* ─── SLIDE 3: Technical ─── */
+    #slide-3 {
+      background: #0f172a;
+    }
+    #slide-3 .slide-title { color: white; }
+    #slide-3 .slide-label { color: #60a5fa; }
+    #slide-3 .slide-subtitle { color: rgba(255,255,255,0.5); }
+
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .flow-step {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 14px 18px;
+      text-align: center;
+      min-width: 110px;
+    }
+
+    .flow-step .icon { font-size: 22px; margin-bottom: 6px; }
+    .flow-step .name { font-size: 10px; font-weight: 700; color: white; }
+    .flow-step .desc { font-size: 9px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+    .flow-arrow {
+      font-size: 20px;
+      color: #22c55e;
+      margin: 0 6px;
+      font-weight: 900;
+    }
+
+    .formula-box {
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 14px;
+      padding: 16px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .formula-box .label { font-size: 10px; color: #4ade80; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 6px; text-transform: uppercase; }
+    .formula-box .formula { font-size: 16px; font-weight: 800; color: white; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .formula-box .formula span { color: #4ade80; }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      flex: 1;
+    }
+
+    .tech-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .tech-card .layer { font-size: 9px; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .tech-card .stack { font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,0.85); line-height: 1.5; }
+
+    /* ─── SLIDE 4: Feasibility ─── */
+    #slide-4 {
+      background: white;
+    }
+    #slide-4 .slide-title { color: var(--gray-900); }
+    #slide-4 .slide-label { color: #7c3aed; }
+    #slide-4 .slide-subtitle { color: var(--gray-500); }
+
+    .challenge-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 6px;
+      flex: 1;
+    }
+
+    .challenge-table thead th {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-500);
+      padding: 0 16px 8px;
+      text-align: left;
+    }
+
+    .challenge-table tbody tr {
+      background: #f9fafb;
+      border-radius: 12px;
+    }
+
+    .challenge-table tbody tr:hover { background: #f0fdf4; }
+
+    .challenge-table tbody td {
+      padding: 12px 16px;
+      font-size: 12px;
+      vertical-align: top;
+    }
+
+    .challenge-table tbody td:first-child {
+      font-weight: 700;
+      color: var(--gray-900);
+      border-radius: 12px 0 0 12px;
+      width: 30%;
+    }
+
+    .challenge-table tbody td:last-child {
+      color: var(--gray-700);
+      border-radius: 0 12px 12px 0;
+      line-height: 1.5;
+    }
+
+    .feasibility-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .feas-card {
+      background: #f9fafb;
+      border-left: 3px solid var(--green);
+      border-radius: 0 12px 12px 0;
+      padding: 10px 14px;
+    }
+
+    .feas-card h4 { font-size: 11px; font-weight: 800; color: var(--gray-900); margin-bottom: 3px; }
+    .feas-card p { font-size: 10.5px; color: var(--gray-500); line-height: 1.4; }
+
+    /* ─── SLIDE 5: Impact ─── */
+    #slide-5 {
+      background: linear-gradient(160deg, #fff7ed 0%, #ffffff 50%, #f0fdf4 100%);
+    }
+    #slide-5 .slide-title { color: var(--gray-900); }
+    #slide-5 .slide-label { color: #ea580c; }
+    #slide-5 .slide-subtitle { color: var(--gray-500); }
+
+    .impact-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .impact-card {
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .impact-card .emoji { font-size: 28px; margin-bottom: 8px; }
+    .impact-card h4 { font-size: 13px; font-weight: 800; margin-bottom: 6px; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .impact-card p { font-size: 10.5px; line-height: 1.5; }
+
+    .roadmap {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .roadmap-item {
+      background: white;
+      border-radius: 14px;
+      padding: 14px;
+      border: 1.5px solid #e5e7eb;
+      position: relative;
+    }
+
+    .roadmap-item .phase {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+
+    .roadmap-item h4 { font-size: 11px; font-weight: 800; color: var(--gray-900); margin-bottom: 4px; }
+    .roadmap-item p { font-size: 10px; color: var(--gray-500); line-height: 1.4; }
+
+    .tbl-section { margin-bottom: 12px; }
+    .tbl-section h3 { font-size: 12px; font-weight: 800; color: var(--gray-900); margin-bottom: 10px; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ─── SLIDE 6: References ─── */
+    #slide-6 {
+      background: var(--gray-900);
+    }
+    #slide-6 .slide-title { color: white; }
+    #slide-6 .slide-label { color: var(--accent); }
+    #slide-6 .slide-subtitle { color: rgba(255,255,255,0.5); }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      flex: 1;
+      margin-bottom: 14px;
+    }
+
+    .comparison-table th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .comparison-table th:first-child { color: rgba(255,255,255,0.5); }
+    .comparison-table th:nth-child(2) { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); border-radius: 10px 10px 0 0; }
+    .comparison-table th:nth-child(3) { background: rgba(34,197,94,0.15); color: #4ade80; border-radius: 10px 10px 0 0; }
+
+    .comparison-table td {
+      padding: 10px 16px;
+      color: rgba(255,255,255,0.8);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .comparison-table td:nth-child(2) { background: rgba(255,255,255,0.03); }
+    .comparison-table td:nth-child(3) { background: rgba(34,197,94,0.06); color: #86efac; font-weight: 600; }
+    .comparison-table td:first-child { font-weight: 700; color: rgba(255,255,255,0.6); font-size: 10.5px; }
+
+    .ref-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .ref-item {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.4;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .ref-item strong { color: var(--accent); font-weight: 700; }
+
+    .links-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .link-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 11px;
+      color: #60a5fa;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* ─── Navigation ─── */
+    .nav-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      padding: 8px 20px;
+      z-index: 999;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+
+    .nav-btn:hover { background: rgba(255,255,255,0.1); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .nav-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dot.active {
+      background: #4ade80;
+      width: 20px;
+      border-radius: 4px;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 600;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .print-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      z-index: 999;
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .print-btn:hover { background: rgba(255,255,255,0.14); }
+
+    @media print {
+      body { background: white; }
+      .nav-bar, .print-btn { display: none !important; }
+      .slide { position: relative !important; opacity: 1 !important; transform: none !important; page-break-after: always; height: 100vh; }
+      .deck { height: auto; overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+
+<div class="deck" id="deck">
+
+  <!-- ─── SLIDE 1 ─── -->
+  <div class="slide active" id="slide-1">
+    <div class="s1-badge">
+      <span></span>
+      SMART INDIA HACKATHON 2026 &nbsp;·&nbsp; PS-89
+    </div>
+    <div class="s1-title">SAHYOG</div>
+    <div class="s1-subtitle">सहयोग &nbsp;—&nbsp; Cooperative Gig Services Platform</div>
+    <div class="s1-tagline">"Trusted Services. Empowered Workers. Stronger Communities."</div>
+
+    <div class="s1-meta">
+      <div class="s1-meta-item">
+        <span class="label">Problem Statement</span>
+        <span class="value">PS-89 · Household & Community Services</span>
+      </div>
+      <div class="s1-meta-item">
+        <span class="label">Theme</span>
+        <span class="value">Smart Automation / Social Welfare / GovTech</span>
+      </div>
+      <div class="s1-meta-item">
+        <span class="label">Category</span>
+        <span class="value">Software · Web Application</span>
+      </div>
+      <div class="s1-meta-item">
+        <span class="label">Target Beneficiaries</span>
+        <span class="value">Urban Households · Cooperative Workers · Federations</span>
+      </div>
+      <div class="s1-meta-item">
+        <span class="label">Team Name</span>
+        <span class="value">[Your Team Name]</span>
+      </div>
+      <div class="s1-meta-item">
+        <span class="label">Team ID</span>
+        <span class="value">[Your Team ID]</span>
+      </div>
+    </div>
+
+    <div class="s1-right">
+      <div class="s1-stat"><div class="num">10K+</div><div class="lbl">Verified Workers</div></div>
+      <div class="s1-stat"><div class="num">50K+</div><div class="lbl">Services Completed</div></div>
+      <div class="s1-stat"><div class="num">80%</div><div class="lbl">Direct Worker Payout</div></div>
+    </div>
+
+    <div class="sih-logo">Smart India Hackathon 2026<br/>Ministry of Education · AICTE</div>
+  </div>
+
+  <!-- ─── SLIDE 2 ─── -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <div>
+        <div class="slide-label">Solution Overview & Uniqueness</div>
+        <div class="slide-title">What is SAHYOG?</div>
+        <div class="slide-subtitle">AI-powered cooperative platform replacing exploitative gig marketplaces with fair, community-owned services</div>
+      </div>
+      <div class="slide-number">02 / 06</div>
+    </div>
+
+    <div class="capability-grid">
+      <div class="cap-card">
+        <div class="cap-icon" style="background:#eff6ff">🤖</div>
+        <div>
+          <h4>Multi-Lingual AI Problem Classifier</h4>
+          <p>Converts informal Hindi, Marathi & English voice/text into structured technical work orders with urgency scoring and pricing.</p>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon" style="background:#f0fdf4">⚖️</div>
+        <div>
+          <h4>Multi-Factor Fair Allocation Engine</h4>
+          <p>S = 0.30(Skill) + 0.25(Proximity) + 0.25(Workload) + 0.20(Rating). Gini Index of 0.18 — no worker monopolies.</p>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon" style="background:#fff7ed">💰</div>
+        <div>
+          <h4>Transparent Escrow & Revenue Split</h4>
+          <p>80% direct to worker · 5% welfare reserve · 10% cooperative fund · 5% platform operations. Guaranteed within 2 hours.</p>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon" style="background:#fdf4ff">🎓</div>
+        <div>
+          <h4>Digital Skill Passport</h4>
+          <p>QR-authenticated NSDC-aligned credentials with Aadhaar eKYC + police clearance badge. Recognized by all partner federations.</p>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon" style="background:#ecfdf5">📊</div>
+        <div>
+          <h4>Predictive Workforce Telemetry</h4>
+          <p>Hourly AI demand forecasting + GIS ward-level hotspot detection with 1-click cross-zone cooperative rebalancing.</p>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon" style="background:#fef2f2">🏛️</div>
+        <div>
+          <h4>Federation Admin Command Center</h4>
+          <p>Real-time workforce telemetry, worker welfare vault, AI recommendations engine, and cooperative analytics dashboard.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="uniqueness-bar">
+      <div class="unique-pill"><div class="num">Gini 0.18</div><div class="lbl">Fair Workload Balance</div></div>
+      <div class="unique-pill"><div class="num">₹5 Lakh</div><div class="lbl">Worker Health Insurance</div></div>
+      <div class="unique-pill"><div class="num">3 Portals</div><div class="lbl">Customer · Worker · Admin</div></div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 3 ─── -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <div>
+        <div class="slide-label">Technical Approach & Architecture</div>
+        <div class="slide-title">How SAHYOG Works</div>
+        <div class="slide-subtitle">End-to-end system flow from customer request to worker payout</div>
+      </div>
+      <div class="slide-number" style="color:rgba(255,255,255,0.35)">03 / 06</div>
+    </div>
+
+    <div class="flow-diagram">
+      <div class="flow-step"><div class="icon">🗣️</div><div class="name">Customer Input</div><div class="desc">Voice / Text / Form</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(34,197,94,0.4)"><div class="icon">🧠</div><div class="name">NLP Classifier</div><div class="desc">3-Language AI</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="icon">🎫</div><div class="name">Work Order</div><div class="desc">Severity + Price</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(34,197,94,0.4)"><div class="icon">⚖️</div><div class="name">Fair Allocator</div><div class="desc">Score Algorithm</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="icon">👷</div><div class="name">Worker Dispatch</div><div class="desc">Real-time GPS</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(34,197,94,0.4)"><div class="icon">💸</div><div class="name">Instant Payout</div><div class="desc">IMPS 2-hr release</div></div>
+    </div>
+
+    <div class="formula-box">
+      <div class="label">Fair Allocation Composite Score Formula</div>
+      <div class="formula">S = <span>0.30</span>(Skill Match) + <span>0.25</span>(Proximity) + <span>0.25</span>(Workload Equity) + <span>0.20</span>(Reliability Rating)</div>
+    </div>
+
+    <div class="tech-grid">
+      <div class="tech-card"><div class="layer">Frontend UI/UX</div><div class="stack">React 19, TypeScript, Tailwind CSS v4, Lucide Icons, Framer Motion</div></div>
+      <div class="tech-card"><div class="layer">Data Visualization</div><div class="stack">Recharts — Hourly demand curves, Gini equity chart, District heatmaps</div></div>
+      <div class="tech-card"><div class="layer">AI Intelligence</div><div class="stack">Multi-lingual NLP Classifier, Composite Score Engine, Demand Forecaster</div></div>
+      <div class="tech-card"><div class="layer">GIS & Mapping</div><div class="stack">Vector Ward GIS Command Interface, Live workforce telemetry overlay</div></div>
+      <div class="tech-card"><div class="layer">Security & Auth</div><div class="stack">Role-Based Access Control (3 Portals), Aadhaar eKYC, SHA-256 Audit</div></div>
+      <div class="tech-card"><div class="layer">Cloud & DevOps</div><div class="stack">Vercel + Render CI/CD, Global CDN Edge (Bangalore), GitHub Actions</div></div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 4 ─── -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <div>
+        <div class="slide-label">Feasibility, Viability & Risk Mitigation</div>
+        <div class="slide-title">Is SAHYOG Deployable?</div>
+        <div class="slide-subtitle">Technical, operational, and financial feasibility with proactive challenge mitigation strategies</div>
+      </div>
+      <div class="slide-number">04 / 06</div>
+    </div>
+
+    <div class="feasibility-row">
+      <div class="feas-card"><h4>✅ Technical Feasibility</h4><p>Lightweight Progressive Web App — runs on any 4G/5G browser without mandatory Play Store installation. Zero native app dependencies.</p></div>
+      <div class="feas-card"><h4>✅ Operational Feasibility</h4><p>Integrates with existing Labour Cooperative Societies under Maharashtra Cooperative Societies Act (1960). No new registration barrier.</p></div>
+      <div class="feas-card"><h4>✅ Financial Viability</h4><p>Self-sustaining 5% ops model covers all cloud infrastructure costs without grants. Scales with transaction volume.</p></div>
+      <div class="feas-card"><h4>✅ Policy Alignment</h4><p>Supports Ministry of Cooperation, e-Shram Portal, Skill India (NSDC), and ONDC Open Network. Regulatory tailwinds, not headwinds.</p></div>
+    </div>
+
+    <table class="challenge-table">
+      <thead>
+        <tr>
+          <th>Challenge Identified</th>
+          <th>Smart Mitigation Strategy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🔴 Worker Digital Adoption Barrier</td>
+          <td>Multi-lingual voice interface (Marathi, Hindi, English) + 1-click minimalist job status transitions requiring zero form filling.</td>
+        </tr>
+        <tr>
+          <td>🟡 Demand vs Supply Spikes</td>
+          <td>AI Predictive Workforce Advisor forecasts shortages 3 hours ahead and sends 1-click cross-zone rebalancing alerts to cooperative leads.</td>
+        </tr>
+        <tr>
+          <td>🟡 Commercial Platform Churn</td>
+          <td>Fixed 80% guaranteed payout + ₹5 Lakh health & accidental insurance + cooperative profit dividend sharing. Workers earn more and are protected.</td>
+        </tr>
+        <tr>
+          <td>🟢 Customer Trust & Service Quality</td>
+          <td>100% verifiable Digital Skill Passport backed by NSDC & police clearance. Fixed rate cards and cooperative 100% satisfaction guarantee.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── SLIDE 5 ─── -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <div>
+        <div class="slide-label">Impact, Benefits & Future Scope</div>
+        <div class="slide-title">What SAHYOG Achieves</div>
+        <div class="slide-subtitle">Multi-stakeholder benefits and long-term cooperative technology roadmap</div>
+      </div>
+      <div class="slide-number">05 / 06</div>
+    </div>
+
+    <div class="impact-row">
+      <div class="impact-card" style="background:#f0fdf4">
+        <div class="emoji">🏠</div>
+        <h4 style="color:#15803d">Customers</h4>
+        <p style="color:#166534">Fair pricing, verified specialists, on-time arrivals, transparent billing, cooperative money-back guarantee.</p>
+      </div>
+      <div class="impact-card" style="background:#eff6ff">
+        <div class="emoji">👷</div>
+        <h4 style="color:#1d4ed8">Workers</h4>
+        <p style="color:#1e40af">80% guaranteed earnings, ₹5L insurance, pension fund, NSDC digital credentials, dignity of labor.</p>
+      </div>
+      <div class="impact-card" style="background:#fff7ed">
+        <div class="emoji">🏛️</div>
+        <h4 style="color:#c2410c">Cooperatives</h4>
+        <p style="color:#9a3412">Digital transformation, transparent welfare reserve, member growth, democratic governance tools.</p>
+      </div>
+      <div class="impact-card" style="background:#fdf4ff">
+        <div class="emoji">🏙️</div>
+        <h4 style="color:#7e22ce">Municipalities</h4>
+        <p style="color:#6b21a8">Formalization of unorganized workforce, real-time labor market data, wage stability, tax compliance.</p>
+      </div>
+    </div>
+
+    <div class="tbl-section">
+      <h3>🗺️ Future Scope & Scalability Roadmap</h3>
+    </div>
+
+    <div class="roadmap">
+      <div class="roadmap-item">
+        <div class="phase">Phase 2 · 2026</div>
+        <h4>ONDC & e-Shram Integration</h4>
+        <p>Interoperable API connecting local cooperatives to pan-India buyer apps and government labor registry.</p>
+      </div>
+      <div class="roadmap-item">
+        <div class="phase">Phase 3 · 2027</div>
+        <h4>AI Voice IVR Dial-In</h4>
+        <p>Automated phone hotline for non-smartphone workers to accept jobs via local dialect IVR menu.</p>
+      </div>
+      <div class="roadmap-item">
+        <div class="phase">Phase 4 · 2027</div>
+        <h4>IoT Smart Diagnostics</h4>
+        <p>Predictive dispatch triggered by smart water meters & solar inverters detecting line faults automatically.</p>
+      </div>
+      <div class="roadmap-item">
+        <div class="phase">Phase 5 · 2028</div>
+        <h4>Cross-Federation Mutual Credit</h4>
+        <p>Low-interest equipment micro-credit tool backed by collective cooperative society reserve deposits.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 6 ─── -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <div>
+        <div class="slide-label">Research, References & Comparison</div>
+        <div class="slide-title">Why SAHYOG Wins</div>
+        <div class="slide-subtitle">Head-to-head comparison with commercial platforms and regulatory backing</div>
+      </div>
+      <div class="slide-number" style="color:rgba(255,255,255,0.35)">06 / 06</div>
+    </div>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Feature / Dimension</th>
+          <th>Commercial Platforms (Urban Company)</th>
+          <th>✅ SAHYOG (Our Solution)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Commission / Payout</td>
+          <td>Extractive 25%–35% platform commission</td>
+          <td>80% Direct + 5% Welfare + 10% Society Fund</td>
+        </tr>
+        <tr>
+          <td>Worker Allocation</td>
+          <td>Monopolistic — top 5% get 50%+ of all jobs</td>
+          <td>Fair Gini-Balanced Algorithm (Index = 0.18)</td>
+        </tr>
+        <tr>
+          <td>Social Security</td>
+          <td>No insurance, no pension, no emergency credit</td>
+          <td>₹5 Lakh Health Cover + Pension + Emergency Advance</td>
+        </tr>
+        <tr>
+          <td>Governance</td>
+          <td>Corporate VC-driven, top-down decisions</td>
+          <td>Democratic Member-Owned Federation (voting rights)</td>
+        </tr>
+        <tr>
+          <td>Skill Verification</td>
+          <td>Unregulated internal crash training</td>
+          <td>NSDC-Aligned Digital Passport + Police Clearance</td>
+        </tr>
+        <tr>
+          <td>Language Support</td>
+          <td>English / Hindi form interfaces only</td>
+          <td>Multi-Lingual NLP & Voice (EN, HI, MR)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ref-row">
+      <div class="ref-item"><strong>1. Ministry of Cooperation</strong> — Model Byelaws for Labour Contract Cooperative Societies (2023–24).</div>
+      <div class="ref-item"><strong>2. NITI Aayog (2022)</strong> — 'Booming Gig and Platform Economy': Social Protection for Gig Workers.</div>
+      <div class="ref-item"><strong>3. Maharashtra Coop Act (1960)</strong> — Framework for Primary Labour Societies.</div>
+      <div class="ref-item"><strong>4. ICA</strong> — Platform Cooperativism: Reclaiming Work in the Digital Economy.</div>
+      <div class="ref-item"><strong>5. NSDC</strong> — National Occupational Standards for Domestic Services & Plumbing.</div>
+    </div>
+
+    <div class="links-row">
+      <a class="link-pill" href="https://sahyog-cooperative.surge.sh" target="_blank">🌐 Live Application: sahyog-cooperative.surge.sh</a>
+      <a class="link-pill" href="https://github.com/Harshad5009/sahyog-cooperative" target="_blank">💻 GitHub: Harshad5009/sahyog-cooperative</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── Navigation Bar ─── -->
+<div class="nav-bar">
+  <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)">‹</button>
+  <div class="nav-dots">
+    <div class="dot active" onclick="goTo(0)"></div>
+    <div class="dot" onclick="goTo(1)"></div>
+    <div class="dot" onclick="goTo(2)"></div>
+    <div class="dot" onclick="goTo(3)"></div>
+    <div class="dot" onclick="goTo(4)"></div>
+    <div class="dot" onclick="goTo(5)"></div>
+  </div>
+  <div class="nav-label" id="nav-label">1 / 6</div>
+  <button class="nav-btn" id="next-btn" onclick="changeSlide(1)">›</button>
+</div>
+
+<script>
+  let current = 0;
+  const total = 6;
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+  const label = document.getElementById('nav-label');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+
+  function goTo(idx) {
+    slides[current].classList.remove('active');
+    slides[current].classList.add('exit');
+    setTimeout(() => slides[current].classList.remove('exit'), 600);
+    current = idx;
+    slides[current].classList.add('active');
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    label.textContent = `${current + 1} / ${total}`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  function changeSlide(dir) {
+    const next = current + dir;
+    if (next >= 0 && next < total) goTo(next);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') changeSlide(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+  });
+
+  prevBtn.disabled = true;
+</script>
+</body>
+</html>
