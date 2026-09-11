@@ -17,9 +17,9 @@ import {
   Bug,
   Tv,
   Wrench,
-  Lock,
-  type LucideIcon
+  Lock
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { MOCK_SERVICES } from '../../data/mockServices';
 
 const SERVICE_ICONS: Record<string, { icon: LucideIcon; bg: string; color: string }> = {
