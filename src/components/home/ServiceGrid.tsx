@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   Wrench, 
   Zap, 
@@ -37,6 +37,35 @@ export const ServiceGrid: React.FC = () => {
     Building2: <Building2 className="w-5 h-5" />,
   };
 
+  const textDict = {
+    en: {
+      badge: 'Cooperative Certified Services',
+      heading: 'What do you need help with?',
+      subheading: '12+ standardized service disciplines delivered by registered cooperative societies with guaranteed rate transparency.',
+      startingFrom: 'Starting from',
+      bookNow: 'Book Now',
+      popular: 'Popular',
+    },
+    hi: {
+      badge: 'सहकारी प्रमाणित सेवाएँ',
+      heading: 'आपको किस सेवा की आवश्यकता है?',
+      subheading: 'पंजीकृत सहकारी समितियों द्वारा प्रदान की जाने वाली १२+ मानकीकृत सेवाएँ, पारदर्शी दरों के साथ।',
+      startingFrom: 'न्यूनतम शुल्क',
+      bookNow: 'अभी बुक करें',
+      popular: 'लोकप्रिय',
+    },
+    mr: {
+      badge: 'सहकारी प्रमाणित सेवा',
+      heading: 'तुम्हाला कोणत्या सेवेची गरज आहे?',
+      subheading: 'नोंदणीकृत सहकारी संस्थांकडून दिली जाणारी १२+ दर्जेदार कामे, संपूर्ण पारदर्शक दरांसह.',
+      startingFrom: 'किमान शुल्क',
+      bookNow: 'आता बुक करा',
+      popular: 'लोकप्रिय',
+    },
+  };
+
+  const t = textDict[language] || textDict.en;
+
   const handleServiceSelect = (serviceId: string) => {
     navigate('/customer/book', { state: { initialCategory: serviceId } });
   };
@@ -48,22 +77,22 @@ export const ServiceGrid: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-coop-100 text-coop-800 rounded-full text-xs font-bold mb-3">
-              <span>Cooperative Certified Services</span>
+              <span>{t.badge}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-coop-950 tracking-tight font-display">
-              What do you need help with?
+              {t.heading}
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-surface-500 max-w-md">
-            12+ standardized service disciplines delivered by registered cooperative societies with guaranteed rate transparency.
+            {t.subheading}
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {MOCK_SERVICES.map(service => {
             const displayName = 
-              language === 'hi' ? service.nameHi : 
-              language === 'mr' ? service.nameMr : 
+              language === 'hi' ? (service.nameHi || service.name) : 
+              language === 'mr' ? (service.nameMr || service.name) : 
               service.name;
 
             return (
@@ -78,7 +107,7 @@ export const ServiceGrid: React.FC = () => {
                     </div>
                     {service.popular && (
                       <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">
-                        Popular
+                        {t.popular}
                       </span>
                     )}
                   </div>
@@ -94,7 +123,7 @@ export const ServiceGrid: React.FC = () => {
 
                 <div className="pt-3 border-t border-surface-100 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-surface-400 block font-medium">Starting from</span>
+                    <span className="text-[10px] text-surface-400 block font-medium">{t.startingFrom}</span>
                     <span className="text-sm font-extrabold text-surface-900 font-display">
                       ₹{service.basePrice}
                     </span>
@@ -104,23 +133,13 @@ export const ServiceGrid: React.FC = () => {
                     onClick={() => handleServiceSelect(service.id)}
                     className="px-3 py-1.5 bg-coop-50 hover:bg-coop-900 text-coop-800 hover:text-white text-xs font-bold rounded-xl border border-coop-200 hover:border-coop-900 transition-all flex items-center gap-1 shadow-xs"
                   >
-                    <span>Book Now</span>
+                    <span>{t.bookNow}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
             );
           })}
-        </div>
-
-        <div className="mt-10 text-center">
-          <Link
-            to="/services"
-            className="inline-flex items-center gap-2 text-xs font-bold text-coop-800 hover:text-coop-950 hover:underline"
-          >
-            <span>View all 12 categories & cooperative rate cards</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
 
       </div>

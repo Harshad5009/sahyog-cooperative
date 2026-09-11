@@ -34,6 +34,71 @@ export const HeroSection: React.FC = () => {
     mr: 'माझ्या घरातील नळ खराब झाला असून पाणी गळत आहे.',
   };
 
+  const heroContent = {
+    en: {
+      pillBadge: 'SIH 2026 Cooperative Workforce Initiative',
+      pillVerified: '100% Verified Federations',
+      title1: 'Trusted Services.',
+      titleGradient: 'Empowered Workers.',
+      title2: 'Stronger Communities.',
+      locationLabel: 'Your Location',
+      serviceLabel: 'Service',
+      describeLabel: 'Describe your problem in everyday words',
+      aiBadge: 'AI Multi-Lingual',
+      voicePrompt: 'Try Voice Sample (EN)',
+      examplesLabel: 'Quick examples:',
+      ex1: 'Blocked sink drain',
+      ex2: 'Sparking switchboard',
+      ex3: 'Deep house cleaning',
+      metricWorkers: 'Verified Coop Workers',
+      metricWelfare: 'Accident & Welfare Cover',
+      metricCommission: 'Retained by Worker',
+      metricRating: 'Patron Trust Rating',
+    },
+    hi: {
+      pillBadge: 'SIH 2026 सहकारी कार्यबल पहल',
+      pillVerified: '१००% सत्यापित महासंघ',
+      title1: 'विश्वसनीय सेवाएँ।',
+      titleGradient: 'सशक्त श्रमिक।',
+      title2: 'सुदृढ़ समाज।',
+      locationLabel: 'आपका स्थान',
+      serviceLabel: 'सेवा चुनें',
+      describeLabel: 'अपनी समस्या को साधारण शब्दों में बताएं',
+      aiBadge: 'AI बहुभाषी',
+      voicePrompt: 'आवाज नमूना (HI)',
+      examplesLabel: 'त्वरित उदाहरण:',
+      ex1: 'रसोई का जाम सिंक',
+      ex2: 'शॉर्ट सर्किट स्विचबोर्ड',
+      ex3: 'पूरे घर की डीप सफाई',
+      metricWorkers: 'सत्यापित सहकारी श्रमिक',
+      metricWelfare: 'दुर्घटना व स्वास्थ्य बीमा',
+      metricCommission: 'श्रमिक को सीधे भुगतान',
+      metricRating: 'ग्राहक संतुष्टि रेटिंग',
+    },
+    mr: {
+      pillBadge: 'SIH 2026 कामगार सहकारी उपक्रम',
+      pillVerified: '१००% अधिकृत महासंघ',
+      title1: 'विश्वसनीय सेवा.',
+      titleGradient: 'सक्षम कामगार.',
+      title2: 'सुदृढ समाज.',
+      locationLabel: 'तुमचे ठिकाण',
+      serviceLabel: 'सेवा निवडा',
+      describeLabel: 'तुमची समस्या साध्या शब्दांत सांगा',
+      aiBadge: 'AI बहुभाषिक',
+      voicePrompt: 'आवाज नमुना (MR)',
+      examplesLabel: 'उदाहरणे:',
+      ex1: 'तुंबलेला सिंक नळ',
+      ex2: 'स्पार्किंग होणारा बोर्ड',
+      ex3: 'घराची सखोल स्वच्छता',
+      metricWorkers: 'नोंदणीकृत सहकारी कामगार',
+      metricWelfare: 'अपघात व कल्याण सुरक्षा',
+      metricCommission: 'थेट कामगारास मोबदला',
+      metricRating: 'ग्राहक विश्वास रेटिंग',
+    },
+  };
+
+  const currentHero = heroContent[language] || heroContent.en;
+
   const handleVoiceSimulate = () => {
     setIsListening(true);
     setTimeout(() => {
@@ -71,20 +136,20 @@ export const HeroSection: React.FC = () => {
         <div className="flex justify-center mb-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-coop-200/80 shadow-subtle text-xs font-semibold text-coop-900">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>SIH 2026 Cooperative Workforce Initiative</span>
+            <span>{currentHero.pillBadge}</span>
             <span className="text-surface-300">•</span>
-            <span className="text-coop-700 font-bold">100% Verified Federations</span>
+            <span className="text-coop-700 font-bold">{currentHero.pillVerified}</span>
           </div>
         </div>
 
         {/* Headline & Subtitle */}
         <div className="text-center max-w-4xl mx-auto mb-12">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-coop-950 tracking-tight font-display leading-[1.15] mb-6">
-            Trusted Services. <br className="hidden sm:inline" />
+            {currentHero.title1} <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-coop-800 via-coop-700 to-emerald-600 bg-clip-text text-transparent">
-              Empowered Workers.
+              {currentHero.titleGradient}
             </span> <br className="hidden sm:inline" />
-            Stronger Communities.
+            {currentHero.title2}
           </h1>
           <p className="text-base sm:text-lg text-surface-600 font-normal leading-relaxed max-w-2xl mx-auto">
             {t.subTagline}
@@ -99,7 +164,7 @@ export const HeroSection: React.FC = () => {
             {/* Location Selector */}
             <div className="sm:col-span-5 relative">
               <label className="text-[11px] font-bold text-surface-500 uppercase tracking-wider block mb-1">
-                Your Location
+                {currentHero.locationLabel}
               </label>
               <div className="flex items-center gap-2 bg-surface-50 border border-surface-200 rounded-xl px-3 py-2 text-xs font-semibold text-surface-800">
                 <MapPin className="w-4 h-4 text-coop-600 shrink-0" />
@@ -121,7 +186,7 @@ export const HeroSection: React.FC = () => {
             {/* Service Category Selector */}
             <div className="sm:col-span-4 relative">
               <label className="text-[11px] font-bold text-surface-500 uppercase tracking-wider block mb-1">
-                Service
+                {currentHero.serviceLabel}
               </label>
               <div className="flex items-center gap-2 bg-surface-50 border border-surface-200 rounded-xl px-3 py-2 text-xs font-semibold text-surface-800">
                 <select
@@ -147,7 +212,7 @@ export const HeroSection: React.FC = () => {
                 onClick={handleQuickBook}
                 className="w-full bg-coop-900 hover:bg-coop-800 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5"
               >
-                <span>Book Service</span>
+                <span>{t.bookService}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -158,9 +223,9 @@ export const HeroSection: React.FC = () => {
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-coop-950 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-emerald-600 animate-pulse" />
-                <span>Describe your problem in everyday words</span>
+                <span>{currentHero.describeLabel}</span>
                 <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                  AI Multi-Lingual
+                  {currentHero.aiBadge}
                 </span>
               </label>
 
@@ -170,7 +235,7 @@ export const HeroSection: React.FC = () => {
                 className="text-[11px] font-semibold text-coop-700 hover:text-coop-900 flex items-center gap-1 bg-coop-50 hover:bg-coop-100 px-2.5 py-1 rounded-lg transition-all"
               >
                 <Volume2 className="w-3.5 h-3.5" />
-                <span>Try Voice Sample ({language.toUpperCase()})</span>
+                <span>{currentHero.voicePrompt}</span>
               </button>
             </div>
 
@@ -200,7 +265,7 @@ export const HeroSection: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => setProblemText('Bathroom concealed pipeline leakage near valve.')}
+                  onClick={() => setProblemText(sampleVoicePrompts[language])}
                   className="p-2 rounded-xl bg-white text-surface-500 hover:text-coop-700 border border-surface-200 hover:border-coop-300 transition-all"
                   title="Attach Photo / Leak Image"
                 >
@@ -229,27 +294,27 @@ export const HeroSection: React.FC = () => {
 
             {/* AI Presets / Quick Chips */}
             <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
-              <span className="text-[11px] text-surface-400 font-medium">Quick examples:</span>
+              <span className="text-[11px] text-surface-400 font-medium">{currentHero.examplesLabel}</span>
               <button
                 type="button"
-                onClick={() => setProblemText('Kitchen sink drain is completely blocked and overflowing.')}
+                onClick={() => setProblemText(sampleVoicePrompts[language])}
                 className="px-2.5 py-1 bg-surface-100 hover:bg-coop-50 text-surface-700 hover:text-coop-900 rounded-lg transition-colors text-[11px] font-medium"
               >
-                Blocked sink drain
+                {currentHero.ex1}
               </button>
               <button
                 type="button"
-                onClick={() => setProblemText('Main switchboard making sparks and tripping the MCB.')}
+                onClick={() => setProblemText(sampleVoicePrompts[language])}
                 className="px-2.5 py-1 bg-surface-100 hover:bg-coop-50 text-surface-700 hover:text-coop-900 rounded-lg transition-colors text-[11px] font-medium"
               >
-                Sparking switchboard
+                {currentHero.ex2}
               </button>
               <button
                 type="button"
-                onClick={() => setProblemText('Need full house deep cleaning before festival.')}
+                onClick={() => setProblemText(sampleVoicePrompts[language])}
                 className="px-2.5 py-1 bg-surface-100 hover:bg-coop-50 text-surface-700 hover:text-coop-900 rounded-lg transition-colors text-[11px] font-medium"
               >
-                Deep house cleaning
+                {currentHero.ex3}
               </button>
             </div>
           </div>
@@ -266,49 +331,49 @@ export const HeroSection: React.FC = () => {
                 10,000+
               </span>
               <span className="text-[11px] text-surface-500 font-semibold">
-                Verified Coop Workers
+                {currentHero.metricWorkers}
               </span>
             </div>
           </div>
 
           <div className="bg-white/80 backdrop-blur-sm border border-surface-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-100 text-amber-800 shrink-0">
-              <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-            </div>
-            <div>
-              <span className="text-base sm:text-lg font-black text-surface-900 block font-display">
-                4.8 / 5.0
-              </span>
-              <span className="text-[11px] text-surface-500 font-semibold">
-                Average Rating
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-sm border border-surface-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-800 shrink-0">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-base sm:text-lg font-black text-surface-900 block font-display">
-                50,000+
-              </span>
-              <span className="text-[11px] text-surface-500 font-semibold">
-                Services Completed
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-sm border border-surface-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-teal-100 text-teal-800 shrink-0">
+            <div className="p-2.5 rounded-xl bg-coop-100 text-coop-800 shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <span className="text-base sm:text-lg font-black text-surface-900 block font-display">
-                100%
+                ₹5,00,000
               </span>
               <span className="text-[11px] text-surface-500 font-semibold">
-                Welfare & Insurance
+                {currentHero.metricWelfare}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white/80 backdrop-blur-sm border border-surface-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-coop-100 text-coop-800 shrink-0">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-base sm:text-lg font-black text-surface-900 block font-display">
+                80%
+              </span>
+              <span className="text-[11px] text-surface-500 font-semibold">
+                {currentHero.metricCommission}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white/80 backdrop-blur-sm border border-surface-200/80 rounded-2xl p-4 shadow-subtle flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-coop-100 text-coop-800 shrink-0">
+              <Star className="w-5 h-5 fill-amber-400 text-amber-500" />
+            </div>
+            <div>
+              <span className="text-base sm:text-lg font-black text-surface-900 block font-display">
+                4.8★
+              </span>
+              <span className="text-[11px] text-surface-500 font-semibold">
+                {currentHero.metricRating}
               </span>
             </div>
           </div>
