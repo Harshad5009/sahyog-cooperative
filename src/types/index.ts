@@ -102,6 +102,43 @@ export interface AIAnalysisResult {
   detectedLanguage?: 'en' | 'hi' | 'mr';
 }
 
+export type PaymentStatus = 
+  | 'payment_pending'             // Payment Pending
+  | 'payment_protected_held'      // Payment Protected/Held (in Sahyog Escrow)
+  | 'additional_amount_requested' // Additional Amount Requested (worker change order pending customer approval)
+  | 'payment_released'            // Payment Released (transferred to worker upon completion)
+  | 'refund_initiated'            // Refund Initiated
+  | 'refund_completed'            // Refund Completed
+  // Legacy compatibility
+  | 'pending'
+  | 'held_in_coop_escrow'
+  | 'paid_to_worker'
+  | 'refunded';
+
+export interface RateCardPricing {
+  baseServiceCharge: number;  // Base service charge (diagnostic / initial safety inspection)
+  labourCharge: number;       // Labour charge (certified technician work)
+  materialCharge: number;     // Material charge (consumables / spare parts)
+  travelCharge: number;       // Travel / visit charge if applicable
+  estimatedTotal: number;     // Estimated price before booking
+}
+
+export interface ChangeRequest {
+  id: string;
+  bookingId: string;
+  workerId: string;
+  workerName: string;
+  createdAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reason: string;
+  labourCost: number;
+  materialCost: number;
+  materialsList?: string;
+  totalExtraAmount: number;
+  customerDecisionAt?: string;
+  customerDecisionNote?: string;
+}
+
 export interface PaymentBreakdown {
   totalAmount: number;
   workerEarnings: number; // ~80%
@@ -131,9 +168,17 @@ export interface Booking {
   aiAnalysis: AIAnalysisResult;
   assignedWorker?: Worker;
   status: BookingStatus;
+  rateCardPricing?: RateCardPricing;
   paymentBreakdown: PaymentBreakdown;
-  paymentStatus: 'pending' | 'held_in_coop_escrow' | 'paid_to_worker' | 'refunded';
+  paymentStatus: PaymentStatus;
   paymentMethod?: string;
+  changeRequests?: ChangeRequest[];
+  refundDetails?: {
+    amount: number;
+    reason: string;
+    initiatedAt: string;
+    completedAt?: string;
+  };
   createdAt: string;
   completedAt?: string;
   customerRating?: number;

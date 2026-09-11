@@ -54,7 +54,29 @@ export const ServicesPage: React.FC = () => {
       </div>
 
       {/* Services Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Transparent Rate Card Notice Box */}
+        <div className="mb-8 p-5 bg-teal-50/80 border border-teal-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-[11px] font-black uppercase tracking-wider text-teal-800 flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-teal-700" />
+              Cooperative Fair Rate Card Standard
+            </span>
+            <h3 className="text-sm font-bold text-gray-900">
+              Clear Pricing Before You Book: Base Charge + Labour + Material + Travel
+            </h3>
+            <p className="text-xs text-gray-600">
+              Estimated prices are clearly shown before booking. Workers cannot increase prices unilaterally — any scope change requires your direct review and approval.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0 text-[11px] font-semibold text-teal-900">
+            <span className="px-2.5 py-1 bg-white border border-teal-200 rounded-lg">Base Service</span>
+            <span className="px-2.5 py-1 bg-white border border-teal-200 rounded-lg">Labour Charge</span>
+            <span className="px-2.5 py-1 bg-white border border-teal-200 rounded-lg">Actual Materials</span>
+            <span className="px-2.5 py-1 bg-white border border-teal-200 rounded-lg">Travel Distance</span>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {MOCK_SERVICES.map(service => {
             const meta = SERVICE_ICONS[service.id] || { icon: Wrench, bg: 'bg-teal-50', color: 'text-teal-700' };
@@ -63,7 +85,7 @@ export const ServicesPage: React.FC = () => {
               <Link
                 key={service.id}
                 to={`/services/${service.id}`}
-                className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-teal-500 hover:shadow-lg transition-all"
+                className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-teal-500 hover:shadow-lg transition-all flex flex-col justify-between"
               >
                 <div className="flex items-start gap-4">
                   <div className={`w-12 h-12 rounded-xl ${meta.bg} ${meta.color} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
@@ -74,12 +96,15 @@ export const ServicesPage: React.FC = () => {
                       {service.name}
                     </h3>
                     <p className="text-sm text-gray-500 mb-3 line-clamp-2">{service.description}</p>
-                    <div className="flex items-center justify-between">
+                    <div className="text-[11px] text-gray-400 font-medium mb-2">
+                      Cooperative Rate Card Available
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                       <span className="text-sm font-bold text-teal-700">
                         ₹{service.basePrice}/hr
                       </span>
                       <span className="text-xs font-semibold text-teal-700 flex items-center gap-1 group-hover:gap-2 transition-all">
-                        Book Now <ArrowRight className="w-3.5 h-3.5" />
+                        View Rates <ArrowRight className="w-3.5 h-3.5" />
                       </span>
                     </div>
                   </div>
@@ -95,9 +120,9 @@ export const ServicesPage: React.FC = () => {
         <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           {[
             { icon: Shield, label: 'Verified Workers', sub: 'Background-checked' },
-            { icon: IndianRupee, label: 'Transparent Pricing', sub: 'No hidden charges' },
+            { icon: IndianRupee, label: 'Transparent Pricing', sub: 'Itemized rate card' },
             { icon: Clock, label: 'On-time Guarantee', sub: 'Punctual service' },
-            { icon: Star, label: '4.9★ Rated', sub: '12,400+ reviews' },
+            { icon: Star, label: '4.9 / 5 Rating', sub: '12,400+ reviews' },
           ].map(item => (
             <div key={item.label} className="text-white">
               <item.icon className="w-6 h-6 mx-auto mb-2 text-green-200" />

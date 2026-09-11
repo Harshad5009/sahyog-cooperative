@@ -13,18 +13,22 @@ import {
   Clock, 
   Briefcase, 
   Siren, 
-  Check, 
   QrCode,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle,
+  PlusCircle
 } from 'lucide-react';
 import { Modal } from '../../components/common/Modal';
 import { SkillPassportCard } from '../../components/worker/SkillPassportCard';
+import { PaymentStatusBadge } from '../../components/common/PaymentStatusBadge';
+import { WorkerChangeRequestModal } from '../../components/worker/WorkerChangeRequestModal';
 
 export const WorkerDashboard: React.FC = () => {
-  const { activeWorker, bookings, updateBookingStatus } = useApp();
+  const { activeWorker, bookings, updateBookingStatus, requestAdditionalWork } = useApp();
   const [isAvailable, setIsAvailable] = useState(activeWorker.isAvailable);
   const [isPassportModalOpen, setIsPassportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'pending' | 'active' | 'completed'>('active');
+  const [changeRequestJob, setChangeRequestJob] = useState<any | null>(null);
 
   const activeJobs = bookings.filter(b => b.status !== 'completed' && b.status !== 'cancelled');
   const completedJobs = bookings.filter(b => b.status === 'completed');
@@ -108,9 +112,9 @@ export const WorkerDashboard: React.FC = () => {
 
         <div className="bg-white border border-surface-200 rounded-2xl p-4 shadow-xs">
           <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center mb-2">
-            <Star className="w-4 h-4 fill-amber-500" />
+            <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
           </div>
-          <span className="text-xl sm:text-2xl font-black text-amber-900 font-display block">{ratingScore} ★</span>
+          <span className="text-xl sm:text-2xl font-black text-amber-900 font-display block">{ratingScore} / 5</span>
           <span className="text-[11px] text-surface-500 font-medium">Customer Rating</span>
         </div>
 
@@ -126,7 +130,7 @@ export const WorkerDashboard: React.FC = () => {
           <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-2">
             <ShieldCheck className="w-4 h-4" />
           </div>
-          <span className="text-xl sm:text-2xl font-black text-emerald-800 font-display block">100% ✓</span>
+          <span className="text-xl sm:text-2xl font-black text-emerald-800 font-display block">100% Verified</span>
           <span className="text-[11px] text-surface-500 font-medium">Profile Verified</span>
         </div>
       </div>
@@ -142,10 +146,49 @@ export const WorkerDashboard: React.FC = () => {
                 #{activeJobs[0].bookingNumber}
               </span>
             </div>
-            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-emerald-100 text-emerald-900">
-              {activeJobs[0].status.replace(/_/g, ' ')}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-emerald-100 text-emerald-900">
+                {activeJobs[0].status.replace(/_/g, ' ')}
+              </span>
+              <PaymentStatusBadge status={activeJobs[0].paymentStatus} size="sm" />
+            </div>
           </div>
+
+          {/* Change Request Banner for Worker */}
+          {activeJobs[0].changeRequests && activeJobs[0].changeRequests[0] && (
+            <div className={`p-3 rounded-2xl border text-xs ${
+              activeJobs[0].changeRequests[0].status === 'pending'
+                ? 'bg-purple-50 border-purple-200 text-purple-900'
+                : activeJobs[0].changeRequests[0].status === 'approved'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                : 'bg-rose-50 border-rose-200 text-rose-900'
+            }`}>
+              <div className="flex items-center justify-between font-bold">
+                <span className="flex items-center gap-1.5">
+                  {activeJobs[0].changeRequests[0].status === 'pending' && (
+                    <>
+                      <AlertTriangle className="w-4 h-4 text-purple-600" />
+                      <span>Additional Work Request Pending (+₹{activeJobs[0].changeRequests[0].totalExtraAmount})</span>
+                    </>
+                  )}
+                  {activeJobs[0].changeRequests[0].status === 'approved' && (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Customer Approved (+₹{activeJobs[0].changeRequests[0].totalExtraAmount})</span>
+                    </>
+                  )}
+                  {activeJobs[0].changeRequests[0].status === 'rejected' && (
+                    <>
+                      <AlertCircle className="w-4 h-4 text-rose-600" />
+                      <span>Customer Declined Additional Scope</span>
+                    </>
+                  )}
+                </span>
+                <span className="text-[10px] uppercase font-mono">{activeJobs[0].changeRequests[0].status}</span>
+              </div>
+              <p className="text-[11px] opacity-85 mt-1">"{activeJobs[0].changeRequests[0].reason}"</p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div>
@@ -182,9 +225,15 @@ export const WorkerDashboard: React.FC = () => {
                 <Phone className="w-3.5 h-3.5" />
                 <span>Call Customer</span>
               </a>
-              <span className="text-xs text-surface-400 font-medium hidden sm:inline">
-                Address: {activeJobs[0].address.area} (~1.8 km)
-              </span>
+              <button
+                type="button"
+                onClick={() => setChangeRequestJob(activeJobs[0])}
+                className="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
+                title="Submit reason + labour/material breakdown. No unilateral price increase."
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>Request Additional Work</span>
+              </button>
             </div>
 
             <div className="flex items-center gap-2">
@@ -278,6 +327,19 @@ export const WorkerDashboard: React.FC = () => {
         >
           <SkillPassportCard worker={activeWorker} />
         </Modal>
+      )}
+
+      {/* Change Request / Additional Work Modal */}
+      {changeRequestJob && (
+        <WorkerChangeRequestModal
+          booking={changeRequestJob}
+          isOpen={!!changeRequestJob}
+          onClose={() => setChangeRequestJob(null)}
+          onSubmit={(data) => {
+            requestAdditionalWork(changeRequestJob.id, data);
+            setChangeRequestJob(null);
+          }}
+        />
       )}
 
     </div>

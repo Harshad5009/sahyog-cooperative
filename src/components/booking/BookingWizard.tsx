@@ -41,6 +41,9 @@ import { useLanguage } from '../../context/LanguageContext';
 import { MOCK_WORKERS } from '../../data/mockWorkers';
 import { MOCK_SERVICES } from '../../data/mockServices';
 import { analyzeProblemWithAI, calculateFairWorkerScores, calculatePaymentBreakdown } from '../../utils/aiMatchingEngine';
+import { calculateRateCardPricing } from '../../utils/pricingAndPayment';
+import { RateCardBreakdown } from '../common/RateCardBreakdown';
+import { PaymentStatusBadge } from '../common/PaymentStatusBadge';
 import type { Worker, AIAnalysisResult, BookingStatus, ServiceItem } from '../../types';
 import confetti from 'canvas-confetti';
 
@@ -822,6 +825,12 @@ export const BookingWizard: React.FC = () => {
             </p>
           </div>
 
+          {/* Standard Clear Rate Card (Base, Labour, Material, Travel, Estimated Price) */}
+          <RateCardBreakdown 
+            pricing={calculateRateCardPricing(calculatedTotal, isEmergency)}
+            serviceName={activeSubService?.name || selectedServiceItem.name}
+          />
+
           {/* Transparent 80/20 Distribution Card */}
           <div className="bg-gradient-to-br from-surface-50 to-coop-50/50 rounded-3xl p-6 border border-surface-200 space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-surface-200">
@@ -1290,6 +1299,15 @@ export const BookingWizard: React.FC = () => {
             <p className="text-xs sm:text-sm text-surface-500 max-w-md mx-auto">
               Transaction ID: <span className="font-mono font-bold text-surface-800">{createdTxnId}</span>. Your service order has been committed to the federation ledger.
             </p>
+
+            {/* Evaluation Feature: Prominent Payment Status Display */}
+            <div className="pt-2 flex justify-center">
+              <PaymentStatusBadge 
+                status={liveStatus === 'completed' ? 'payment_released' : 'payment_protected_held'} 
+                showDescription={true}
+                size="md" 
+              />
+            </div>
           </div>
 
           {/* Live Milestone Tracker */}

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Clock, Star, ShieldCheck, Wrench, ClipboardList, CreditCard, User, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, Clock, Star, ShieldCheck, Wrench, ClipboardList, CreditCard, User, Sparkles, AlertTriangle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { PaymentStatusBadge } from '../../components/common/PaymentStatusBadge';
 
 export const CustomerDashboard: React.FC = () => {
   const { bookings } = useApp();
@@ -37,7 +38,7 @@ export const CustomerDashboard: React.FC = () => {
           { label: 'Total Bookings', value: bookings.length, icon: BookOpen, color: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Active Services', value: activeBookings.length, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'Completed', value: completedBookings.length, icon: ShieldCheck, color: 'text-teal-600', bg: 'bg-teal-50' },
-          { label: 'Avg Rating Given', value: '4.8 ★', icon: Star, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Avg Rating Given', value: '4.8 / 5', icon: Star, color: 'text-purple-600', bg: 'bg-purple-50' },
         ].map(s => (
           <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-4">
             <div className={`w-9 h-9 ${s.bg} rounded-xl flex items-center justify-center mb-3`}>
@@ -57,20 +58,46 @@ export const CustomerDashboard: React.FC = () => {
             Active Service Dispatches
           </h2>
           <div className="space-y-3">
-            {activeBookings.map(bk => (
-              <div key={bk.id} className="flex items-center justify-between p-4 bg-teal-50/60 border border-teal-200 rounded-xl gap-4">
-                <div className="flex items-center gap-3">
-                  <img src={bk.assignedWorker?.avatar} alt="" className="w-10 h-10 rounded-xl object-cover border border-teal-200" />
-                  <div>
-                    <p className="text-sm font-bold text-gray-900">{bk.subServiceName}</p>
-                    <p className="text-xs text-gray-500">{bk.assignedWorker?.name} · {bk.address.area}</p>
+            {activeBookings.map(bk => {
+              const hasPendingCR = bk.paymentStatus === 'additional_amount_requested' || 
+                (bk.changeRequests && bk.changeRequests.some(cr => cr.status === 'pending'));
+
+              return (
+                <div key={bk.id} className="p-4 bg-teal-50/50 border border-teal-200 rounded-xl space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <img src={bk.assignedWorker?.avatar} alt="" className="w-10 h-10 rounded-xl object-cover border border-teal-200" />
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">{bk.subServiceName}</p>
+                        <p className="text-xs text-gray-500">{bk.assignedWorker?.name} · {bk.address.area}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-bold px-2.5 py-1 bg-teal-700 text-white rounded-full whitespace-nowrap">
+                        {bk.status.replace(/_/g, ' ')}
+                      </span>
+                      <PaymentStatusBadge status={bk.paymentStatus} size="sm" />
+                    </div>
                   </div>
+
+                  {/* Change Request Notification Banner */}
+                  {hasPendingCR && (
+                    <div className="p-3 bg-purple-100 border border-purple-300 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 text-xs text-purple-900 font-medium">
+                        <AlertTriangle className="w-4 h-4 text-purple-700 shrink-0" />
+                        <span>Worker requested additional scope & parts. No price increase is applied without your approval.</span>
+                      </div>
+                      <Link
+                        to="/customer/bookings"
+                        className="px-3 py-1 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded-lg shadow-xs transition-colors shrink-0"
+                      >
+                        Review Request →
+                      </Link>
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs font-bold px-2.5 py-1 bg-teal-700 text-white rounded-full whitespace-nowrap">
-                  {bk.status.replace(/_/g, ' ')}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

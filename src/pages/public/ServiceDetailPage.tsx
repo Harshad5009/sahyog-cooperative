@@ -1,12 +1,15 @@
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShieldCheck, CheckCircle2, Star, Clock, Wrench, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, CheckCircle2, Star, Clock, Wrench, ArrowRight, Tag } from 'lucide-react';
 import { MOCK_SERVICES } from '../../data/mockServices';
+import { RateCardBreakdown } from '../../components/common/RateCardBreakdown';
+import { calculateRateCardPricing } from '../../utils/pricingAndPayment';
 
 export const ServiceDetailPage: React.FC = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const navigate = useNavigate();
   const service = MOCK_SERVICES.find(s => s.id === serviceId) || MOCK_SERVICES[0];
+  const ratePricing = calculateRateCardPricing(service.basePrice);
 
   return (
     <div className="pt-28 pb-20 bg-surface-50 min-h-screen">
@@ -39,6 +42,15 @@ export const ServiceDetailPage: React.FC = () => {
                 ₹{service.basePrice}
               </span>
             </div>
+          </div>
+
+          {/* Standard Itemized Rate Card (Base, Labour, Material, Travel, Estimated Price) */}
+          <div className="py-6 border-b border-surface-100">
+            <h3 className="text-sm font-bold text-surface-900 mb-3 flex items-center gap-1.5">
+              <Tag className="w-4 h-4 text-coop-700" />
+              <span>Standardized Rate Card Components</span>
+            </h3>
+            <RateCardBreakdown pricing={ratePricing} serviceName={service.name} />
           </div>
 
           {/* Subservices Rate Table */}

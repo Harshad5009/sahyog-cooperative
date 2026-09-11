@@ -33,7 +33,14 @@ export const MOCK_BOOKINGS: Booking[] = [
       detectedLanguage: 'en'
     },
     assignedWorker: MOCK_WORKERS[0], // Ramesh Patil
-    status: 'en_route',
+    status: 'arrived',
+    rateCardPricing: {
+      baseServiceCharge: 149,
+      labourCharge: 450,
+      materialCharge: 352,
+      travelCharge: 49,
+      estimatedTotal: 1000,
+    },
     paymentBreakdown: {
       totalAmount: 1000,
       workerEarnings: 800, // 80%
@@ -41,10 +48,74 @@ export const MOCK_BOOKINGS: Booking[] = [
       cooperativeFund: 100, // 10%
       platformOperations: 50, // 5%
     },
-    paymentStatus: 'held_in_coop_escrow',
+    paymentStatus: 'additional_amount_requested',
     paymentMethod: 'UPI (Google Pay / PhonePe)',
     createdAt: '2026-08-30T10:15:00Z',
     isEmergency: true,
+    changeRequests: [
+      {
+        id: 'cr-8902',
+        bookingId: 'bk-demo-001',
+        workerId: 'w1',
+        workerName: 'Ramesh Patil',
+        createdAt: '15 mins ago',
+        status: 'pending',
+        reason: 'Main concealed ball-valve threading is eroded and leaking behind the wall tiles. Requires cutting section, replacing with heavy-duty 3/4" brass valve and pressure-rated CPVC coupling.',
+        labourCost: 200,
+        materialCost: 350,
+        materialsList: '1x 3/4" Zoloto Brass Ball Valve, Teflon sealant roll, 1x CPVC union',
+        totalExtraAmount: 550,
+      }
+    ]
+  },
+  {
+    id: 'bk-active-004',
+    bookingNumber: 'SHY-2026-9120',
+    serviceCategory: 'carpentry',
+    subServiceName: 'Door Lock & Latch Replacement',
+    customerName: 'Kavita Menon',
+    customerPhone: '+91 97654 33210',
+    address: {
+      street: 'Plot 28, Mayur Colony, Near Joggers Park',
+      area: 'Kothrud',
+      city: 'Pune',
+      pincode: '411038'
+    },
+    date: 'Today',
+    timeSlot: '04:00 PM - 05:30 PM',
+    urgency: 'medium',
+    problemDescription: 'Main door mortise handle is stuck and latch does not retract properly.',
+    aiAnalysis: {
+      detectedCategory: 'carpentry',
+      subService: 'Door Lock & Latch Replacement',
+      urgency: 'medium',
+      requiredSkill: 'Master Carpenter',
+      requiredCertifications: ['Cooperative Certified Joinery Level 3'],
+      toolsNeeded: ['Chisels', 'Screw Gun', 'Precision Depth Gauge'],
+      estimatedCostRange: [299, 499],
+      estimatedDuration: '45 mins',
+      confidenceScore: 97.5,
+      problemSummary: 'Mortise lock spring failure requiring lockset alignment & cylinder replacement.',
+    },
+    assignedWorker: MOCK_WORKERS[1], // Shankar Kamble
+    status: 'in_progress',
+    rateCardPricing: {
+      baseServiceCharge: 99,
+      labourCharge: 350,
+      materialCharge: 200,
+      travelCharge: 0,
+      estimatedTotal: 649,
+    },
+    paymentBreakdown: {
+      totalAmount: 649,
+      workerEarnings: 519.2,
+      welfareInsurance: 32.45,
+      cooperativeFund: 64.9,
+      platformOperations: 32.45,
+    },
+    paymentStatus: 'payment_protected_held',
+    paymentMethod: 'Cooperative Escrow (UPI)',
+    createdAt: '2026-08-30T14:20:00Z',
   },
   {
     id: 'bk-past-002',
@@ -77,6 +148,13 @@ export const MOCK_BOOKINGS: Booking[] = [
     },
     assignedWorker: MOCK_WORKERS[2], // Ganesh Shinde
     status: 'completed',
+    rateCardPricing: {
+      baseServiceCharge: 149,
+      labourCharge: 450,
+      materialCharge: 251,
+      travelCharge: 0,
+      estimatedTotal: 850,
+    },
     paymentBreakdown: {
       totalAmount: 850,
       workerEarnings: 680,
@@ -84,7 +162,7 @@ export const MOCK_BOOKINGS: Booking[] = [
       cooperativeFund: 85,
       platformOperations: 42.5,
     },
-    paymentStatus: 'paid_to_worker',
+    paymentStatus: 'payment_released',
     paymentMethod: 'Cooperative Escrow Wallet',
     createdAt: '2026-08-28T13:40:00Z',
     completedAt: '2026-08-28T15:20:00Z',
@@ -122,6 +200,13 @@ export const MOCK_BOOKINGS: Booking[] = [
     },
     assignedWorker: MOCK_WORKERS[3], // Sunita Jadhav
     status: 'completed',
+    rateCardPricing: {
+      baseServiceCharge: 199,
+      labourCharge: 600,
+      materialCharge: 401,
+      travelCharge: 0,
+      estimatedTotal: 1200,
+    },
     paymentBreakdown: {
       totalAmount: 1200,
       workerEarnings: 960,
@@ -129,11 +214,66 @@ export const MOCK_BOOKINGS: Booking[] = [
       cooperativeFund: 120,
       platformOperations: 60,
     },
-    paymentStatus: 'paid_to_worker',
+    paymentStatus: 'payment_released',
     paymentMethod: 'UPI',
     createdAt: '2026-08-25T09:00:00Z',
     completedAt: '2026-08-25T12:15:00Z',
     customerRating: 5,
     customerFeedback: 'Sunita did a fantastic job with complete eco-friendly products. The bathrooms look brand new.',
+  },
+  {
+    id: 'bk-refund-005',
+    bookingNumber: 'SHY-2026-5501',
+    serviceCategory: 'plumbing',
+    subServiceName: 'Drainage & Clog Removal',
+    customerName: 'Sanjay Deshmukh',
+    customerPhone: '+91 98221 88741',
+    address: {
+      street: 'Flat 12, Suyog Nagar, Warje Flyover',
+      area: 'Warje',
+      city: 'Pune',
+      pincode: '411058'
+    },
+    date: '20 Aug 2026',
+    timeSlot: '09:00 AM - 10:30 AM',
+    urgency: 'low',
+    problemDescription: 'Kitchen sink slow drain clearing.',
+    aiAnalysis: {
+      detectedCategory: 'plumbing',
+      subService: 'Drainage & Clog Removal',
+      urgency: 'low',
+      requiredSkill: 'Plumber',
+      requiredCertifications: ['Sanitary Drainage Certificate'],
+      toolsNeeded: ['Drain Auger', 'Enzyme Cleaner'],
+      estimatedCostRange: [349, 499],
+      estimatedDuration: '30 mins',
+      confidenceScore: 95.0,
+      problemSummary: 'Kitchen sink pipe blockage.',
+    },
+    assignedWorker: MOCK_WORKERS[0],
+    status: 'cancelled',
+    rateCardPricing: {
+      baseServiceCharge: 99,
+      labourCharge: 250,
+      materialCharge: 100,
+      travelCharge: 0,
+      estimatedTotal: 449,
+    },
+    paymentBreakdown: {
+      totalAmount: 449,
+      workerEarnings: 359.2,
+      welfareInsurance: 22.45,
+      cooperativeFund: 44.9,
+      platformOperations: 22.45,
+    },
+    paymentStatus: 'refund_completed',
+    refundDetails: {
+      amount: 449,
+      reason: 'Customer cancelled prior to worker dispatch due to sudden outstation travel',
+      initiatedAt: '20 Aug 2026 08:30 AM',
+      completedAt: '20 Aug 2026 08:45 AM',
+    },
+    paymentMethod: 'UPI / NetBanking',
+    createdAt: '2026-08-20T08:15:00Z',
   }
 ];

@@ -8,12 +8,14 @@ import type {
   NotificationItem, 
   UserRole, 
   AIAnalysisResult,
-  PaymentBreakdown
+  PaymentBreakdown,
+  ChangeRequest
 } from '../types';
 import { MOCK_WORKERS } from '../data/mockWorkers';
 import { MOCK_BOOKINGS } from '../data/mockBookings';
 import { MOCK_DEMAND_HOTSPOTS, MOCK_AI_RECOMMENDATIONS } from '../data/mockDemand';
 import { calculatePaymentBreakdown } from '../utils/aiMatchingEngine';
+import { calculateRateCardPricing } from '../utils/pricingAndPayment';
 
 interface AppContextType {
   currentRole: UserRole;
@@ -45,6 +47,17 @@ interface AppContextType {
   reallocateWorkersAction: (fromZone: string, toZone: string, count: number, service: string) => void;
   toggleWorkerAvailability: (workerId: string) => void;
   toggleWorkerEmergencyDuty: (workerId: string) => void;
+  
+  // Evaluation Features: Change Request & Payment Lifecycle
+  requestAdditionalWork: (bookingId: string, data: {
+    reason: string;
+    labourCost: number;
+    materialCost: number;
+    materialsList: string;
+  }) => void;
+  respondToChangeRequest: (bookingId: string, requestId: string, decision: 'approve' | 'reject', note?: string) => void;
+  releasePayment: (bookingId: string) => void;
+  initiateRefund: (bookingId: string, reason: string) => void;
   
   // Automated Presentation Demo Runner
   isDemoRunning: boolean;
@@ -133,6 +146,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isEmergency?: boolean;
   }): Booking => {
     const paymentBreakdown: PaymentBreakdown = calculatePaymentBreakdown(data.totalPrice);
+    const rateCardPricing = calculateRateCardPricing(data.totalPrice, data.isEmergency);
     
     const newBooking: Booking = {
       id: `bk-${Date.now()}`,
@@ -149,8 +163,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       aiAnalysis: data.aiAnalysis,
       assignedWorker: data.assignedWorker,
       status: 'allocated',
+      rateCardPricing,
       paymentBreakdown,
-      paymentStatus: 'held_in_coop_escrow',
+      paymentStatus: 'payment_protected_held',
       paymentMethod: 'UPI / Cooperative Escrow',
       createdAt: new Date().toISOString(),
       isEmergency: data.isEmergency,
@@ -172,7 +187,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Trigger notification to worker and customer
     addNotification({
-      title: data.isEmergency ? '🚨 Emergency SOS Booking Assigned' : 'New Service Booking Assigned',
+      title: data.isEmergency ? '[SOS Emergency] Service Booking Assigned' : 'New Service Booking Assigned',
       message: `${newBooking.subServiceName} in ${data.address.area}. Assigned to ${data.assignedWorker.name}.`,
       type: data.isEmergency ? 'emergency' : 'job',
       roleTarget: 'worker',
@@ -181,7 +196,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     addNotification({
       title: 'Booking Confirmed with Cooperative Worker',
-      message: `Assigned verified professional ${data.assignedWorker.name} (${data.assignedWorker.rating}★).`,
+      message: `Assigned verified professional ${data.assignedWorker.name} (${data.assignedWorker.rating}/5 rating).`,
       type: 'job',
       roleTarget: 'customer',
       actionUrl: '/customer/bookings'
@@ -198,11 +213,174 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...b,
           status,
           completedAt: isNowCompleted ? new Date().toISOString() : b.completedAt,
-          paymentStatus: isNowCompleted ? 'paid_to_worker' : b.paymentStatus,
+          paymentStatus: isNowCompleted ? 'payment_released' : b.paymentStatus,
         };
       }
       return b;
     }));
+  };
+
+  // Evaluation: Change Request / Additional Work Flow (No unilateral price increase)
+  const requestAdditionalWork = (bookingId: string, data: {
+    reason: string;
+    labourCost: number;
+    materialCost: number;
+    materialsList: string;
+  }) => {
+    const totalExtraAmount = (Number(data.labourCost) || 0) + (Number(data.materialCost) || 0);
+    const newRequest: ChangeRequest = {
+      id: `cr-${Date.now()}`,
+      bookingId,
+      workerId: activeWorker.id,
+      workerName: activeWorker.name,
+      createdAt: 'Just now',
+      status: 'pending',
+      reason: data.reason,
+      labourCost: data.labourCost,
+      materialCost: data.materialCost,
+      materialsList: data.materialsList,
+      totalExtraAmount,
+    };
+
+    setBookings(prev => prev.map(b => {
+      if (b.id === bookingId) {
+        return {
+          ...b,
+          paymentStatus: 'additional_amount_requested',
+          changeRequests: [newRequest, ...(b.changeRequests || [])],
+        };
+      }
+      return b;
+    }));
+
+    addNotification({
+      title: '⚠️ Additional Work Requested by Worker',
+      message: `${activeWorker.name} requested extra ₹${totalExtraAmount} for "${data.reason}". Customer approval required.`,
+      type: 'alert',
+      roleTarget: 'customer',
+      actionUrl: '/customer/bookings',
+    });
+  };
+
+  const respondToChangeRequest = (bookingId: string, requestId: string, decision: 'approve' | 'reject', note?: string) => {
+    setBookings(prev => prev.map(b => {
+      if (b.id === bookingId) {
+        const req = b.changeRequests?.find(r => r.id === requestId);
+        const extraAmount = req ? req.totalExtraAmount : 0;
+        
+        const updatedRequests = b.changeRequests?.map(r => {
+          if (r.id === requestId) {
+            return {
+              ...r,
+              status: decision === 'approve' ? ('approved' as const) : ('rejected' as const),
+              customerDecisionAt: 'Just now',
+              customerDecisionNote: note,
+            };
+          }
+          return r;
+        });
+
+        if (decision === 'approve') {
+          const newTotal = b.paymentBreakdown.totalAmount + extraAmount;
+          const updatedBreakdown = calculatePaymentBreakdown(newTotal);
+          return {
+            ...b,
+            paymentBreakdown: updatedBreakdown,
+            paymentStatus: 'payment_protected_held',
+            changeRequests: updatedRequests,
+          };
+        } else {
+          return {
+            ...b,
+            paymentStatus: 'payment_protected_held',
+            changeRequests: updatedRequests,
+          };
+        }
+      }
+      return b;
+    }));
+
+    if (decision === 'approve') {
+      addNotification({
+        title: '✓ Additional Scope Approved by Customer',
+        message: 'Escrow amount updated. Technician authorized to proceed with additional work.',
+        type: 'job',
+        roleTarget: 'worker',
+        actionUrl: '/worker/jobs',
+      });
+    } else {
+      addNotification({
+        title: '✗ Additional Work Declined by Customer',
+        message: 'Customer declined extra charges. Please proceed strictly with original agreed scope.',
+        type: 'alert',
+        roleTarget: 'worker',
+        actionUrl: '/worker/jobs',
+      });
+    }
+  };
+
+  const releasePayment = (bookingId: string) => {
+    setBookings(prev => prev.map(b => {
+      if (b.id === bookingId) {
+        return {
+          ...b,
+          status: 'completed',
+          paymentStatus: 'payment_released',
+          completedAt: new Date().toISOString(),
+        };
+      }
+      return b;
+    }));
+
+    addNotification({
+      title: 'Payment Released to Worker',
+      message: 'Cooperative Escrow released 80% direct earnings to worker and 5% to welfare reserve.',
+      type: 'welfare',
+      roleTarget: 'worker',
+      actionUrl: '/worker/earnings',
+    });
+  };
+
+  const initiateRefund = (bookingId: string, reason: string) => {
+    setBookings(prev => prev.map(b => {
+      if (b.id === bookingId) {
+        return {
+          ...b,
+          status: 'cancelled',
+          paymentStatus: 'refund_initiated',
+          refundDetails: {
+            amount: b.paymentBreakdown.totalAmount,
+            reason,
+            initiatedAt: 'Just now',
+          },
+        };
+      }
+      return b;
+    }));
+
+    setTimeout(() => {
+      setBookings(prev => prev.map(b => {
+        if (b.id === bookingId) {
+          return {
+            ...b,
+            paymentStatus: 'refund_completed',
+            refundDetails: {
+              ...(b.refundDetails || { amount: b.paymentBreakdown.totalAmount, reason, initiatedAt: 'Just now' }),
+              completedAt: 'Just now',
+            },
+          };
+        }
+        return b;
+      }));
+    }, 2000);
+
+    addNotification({
+      title: 'Refund Initiated',
+      message: `Full escrow refund initiated for: ${reason}. Amount returning to source account.`,
+      type: 'system',
+      roleTarget: 'customer',
+      actionUrl: '/customer/payments',
+    });
   };
 
   const submitCustomerReview = (bookingId: string, rating: number, feedback: string) => {
@@ -355,6 +533,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         reallocateWorkersAction,
         toggleWorkerAvailability,
         toggleWorkerEmergencyDuty,
+        requestAdditionalWork,
+        respondToChangeRequest,
+        releasePayment,
+        initiateRefund,
         isDemoRunning,
         demoStep,
         demoMessage,
