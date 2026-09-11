@@ -103,7 +103,7 @@ export const AdminBookingsPage: React.FC = () => {
         <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none text-xs">
           {[
             { id: 'all', label: 'All Bookings' },
-            { id: 'emergency', label: '🚨 Emergency' },
+            { id: 'emergency', label: 'Emergency SOS' },
             { id: 'assigned', label: 'Assigned' },
             { id: 'active', label: 'Active (In Progress)' },
             { id: 'completed', label: 'Completed' },

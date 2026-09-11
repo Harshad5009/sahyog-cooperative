@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale, TrendingUp, Users, HeartHandshake, ShieldCheck, Award } from 'lucide-react';
+import { Scale, TrendingUp, Users, HeartHandshake, ShieldCheck, Award, Info } from 'lucide-react';
 import { StatCard } from '../../components/common/StatCard';
 import { 
   ResponsiveContainer, 
@@ -99,8 +99,9 @@ export const AdminAnalyticsPage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="mt-6 p-4 bg-surface-50 rounded-2xl border border-surface-200 text-xs text-surface-700 leading-relaxed">
-          💡 <strong>Key Analytical Finding:</strong> In commercial platforms, the top 20% highest rated workers receive <strong>52% of all allocations</strong>, causing extreme fatigue, whereas Sahyog maintains an even ~20% distribution across all skill-certified members.
+        <div className="mt-6 p-4 bg-teal-50/50 rounded-2xl border border-teal-200 text-xs text-teal-950 leading-relaxed flex items-start gap-2.5">
+          <Info className="w-4 h-4 text-teal-700 shrink-0 mt-0.5" />
+          <span><strong>Key Analytical Finding:</strong> In commercial platforms, the top 20% highest rated workers receive <strong>52% of all allocations</strong>, causing extreme fatigue, whereas Sahyog maintains an even ~20% distribution across all skill-certified members.</span>
         </div>
       </div>
 

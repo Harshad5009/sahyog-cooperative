@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Shield, TrendingUp, Award, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
+import { Users, Shield, TrendingUp, Award, CheckCircle2, XCircle, ArrowRight, X, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const CommunityImpact: React.FC = () => {
@@ -81,19 +81,19 @@ export const CommunityImpact: React.FC = () => {
 
                 <ul className="space-y-3 text-xs text-surface-400">
                   <li className="flex items-start gap-2">
-                    <span className="text-rose-400 font-bold">✕</span>
+                    <X className="w-3.5 h-3.5 text-rose-400 mt-0.5 shrink-0" />
                     <span><strong>20%–35% High Commissions</strong> deducted from worker earnings.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-rose-400 font-bold">✕</span>
+                    <X className="w-3.5 h-3.5 text-rose-400 mt-0.5 shrink-0" />
                     <span><strong>No Social Security or Health Insurance:</strong> Zero safety net during injuries.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-rose-400 font-bold">✕</span>
+                    <X className="w-3.5 h-3.5 text-rose-400 mt-0.5 shrink-0" />
                     <span><strong>Monopolistic Algorithm:</strong> Overworks top 5% while leaving other workers with zero calls.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-rose-400 font-bold">✕</span>
+                    <X className="w-3.5 h-3.5 text-rose-400 mt-0.5 shrink-0" />
                     <span><strong>No Worker Voice:</strong> Arbitrary account blocking without human appeals.</span>
                   </li>
                 </ul>
@@ -114,19 +114,19 @@ export const CommunityImpact: React.FC = () => {
 
                 <ul className="space-y-3 text-xs text-emerald-100/90">
                   <li className="flex items-start gap-2">
-                    <span className="text-emerald-400 font-bold">✓</span>
+                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
                     <span><strong>80% Guaranteed Direct Wage:</strong> Transparent society ledger breakdown.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-emerald-400 font-bold">✓</span>
+                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
                     <span><strong>₹5 Lakh Group Health & Accident Cover:</strong> 100% funded through welfare pool.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-emerald-400 font-bold">✓</span>
+                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
                     <span><strong>Fair Workload AI:</strong> Distributes jobs evenly across all certified society members.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-emerald-400 font-bold">✓</span>
+                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
                     <span><strong>Democratic Governance:</strong> Workers are voting shareholders in their cooperative federation.</span>
                   </li>
                 </ul>

@@ -238,9 +238,10 @@ export const FairAllocationSection: React.FC = () => {
           </div>
 
           {/* Key Takeaway Banner */}
-          <div className="mt-6 pt-6 border-t border-surface-100 text-center">
+          <div className="mt-6 pt-6 border-t border-surface-100 text-center flex items-center justify-center gap-1.5">
+            <Sparkles className="w-4 h-4 text-teal-700" />
             <p className="text-xs font-semibold text-coop-950">
-              ✨ <strong>Cooperative Advantage:</strong> Customer gets a verified, energized expert • All society workers earn equitable daily livelihoods.
+              <strong>Cooperative Advantage:</strong> Customer gets a verified, energized expert • All society workers earn equitable daily livelihoods.
             </p>
           </div>
 

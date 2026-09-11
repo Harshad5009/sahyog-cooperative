@@ -51,7 +51,7 @@ export const EmergencyBanner: React.FC = () => {
                 className="px-6 py-3.5 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-rose-900/40 flex items-center gap-2 active:scale-95 transition-all"
               >
                 <Siren className="w-4 h-4 animate-bounce" />
-                <span>🚨 Emergency Service SOS</span>
+                <span>Emergency Service SOS</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 

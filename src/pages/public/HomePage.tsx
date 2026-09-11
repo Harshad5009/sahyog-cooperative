@@ -269,15 +269,15 @@ export const HomePage: React.FC = () => {
             
             {/* Handwriting Label on Top Right */}
             <div className="self-end mr-4 mb-2 hidden sm:flex items-center gap-2 text-right">
-              <div className="leading-tight">
-                <span className="text-xs font-bold text-gray-700 block font-handwriting italic">
+              <div className="leading-none">
+                <span className="text-lg font-bold text-gray-700 block font-handwriting">
                   Local Skilled Workers
                 </span>
-                <span className="text-[11px] text-gray-500 font-handwriting italic">
+                <span className="text-sm font-semibold text-gray-500 font-handwriting">
                   for a Stronger Tomorrow
                 </span>
               </div>
-              <svg className="w-8 h-8 text-gray-400 rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <svg className="w-8 h-8 text-teal-700/60 rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <path d="M4 4c6 2 12 6 14 12" />
                 <path d="M14 16l4 0l0-4" />
               </svg>
@@ -506,10 +506,10 @@ export const HomePage: React.FC = () => {
           
           {/* Left: 5 Connected Step Nodes */}
           <div className="lg:col-span-8 bg-white border border-gray-200/90 rounded-3xl p-6 sm:p-8 shadow-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 sm:gap-2 relative">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-2 relative">
               
               {/* Step 1 */}
-              <div className="flex flex-col items-center text-center relative z-10">
+              <div className="flex flex-col items-center text-center relative z-10 flex-1">
                 <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
                   <Search className="w-5 h-5" />
                   <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">
@@ -522,8 +522,10 @@ export const HomePage: React.FC = () => {
                 </p>
               </div>
 
+              <ArrowRight className="hidden sm:block w-4 h-4 text-gray-300 shrink-0 self-center -mt-6" />
+
               {/* Step 2 */}
-              <div className="flex flex-col items-center text-center relative z-10">
+              <div className="flex flex-col items-center text-center relative z-10 flex-1">
                 <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
                   <Cpu className="w-5 h-5" />
                   <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">
@@ -536,8 +538,10 @@ export const HomePage: React.FC = () => {
                 </p>
               </div>
 
+              <ArrowRight className="hidden sm:block w-4 h-4 text-gray-300 shrink-0 self-center -mt-6" />
+
               {/* Step 3 */}
-              <div className="flex flex-col items-center text-center relative z-10">
+              <div className="flex flex-col items-center text-center relative z-10 flex-1">
                 <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
                   <Calendar className="w-5 h-5" />
                   <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">
@@ -550,8 +554,10 @@ export const HomePage: React.FC = () => {
                 </p>
               </div>
 
+              <ArrowRight className="hidden sm:block w-4 h-4 text-gray-300 shrink-0 self-center -mt-6" />
+
               {/* Step 4 */}
-              <div className="flex flex-col items-center text-center relative z-10">
+              <div className="flex flex-col items-center text-center relative z-10 flex-1">
                 <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
                   <CreditCard className="w-5 h-5" />
                   <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">
@@ -564,8 +570,10 @@ export const HomePage: React.FC = () => {
                 </p>
               </div>
 
+              <ArrowRight className="hidden sm:block w-4 h-4 text-gray-300 shrink-0 self-center -mt-6" />
+
               {/* Step 5 */}
-              <div className="flex flex-col items-center text-center relative z-10">
+              <div className="flex flex-col items-center text-center relative z-10 flex-1">
                 <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
                   <Star className="w-5 h-5 fill-white" />
                   <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">

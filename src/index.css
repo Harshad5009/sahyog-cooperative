@@ -106,6 +106,10 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
+.font-handwriting {
+  font-family: 'Caveat', cursive, sans-serif;
+}
+
 /* Animation utilities */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }

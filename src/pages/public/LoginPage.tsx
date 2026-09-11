@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, ArrowRight, Users, UserCheck, Landmark, CheckCircle2 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -42,17 +42,25 @@ export const LoginPage: React.FC = () => {
 
           {/* Role Selector */}
           <div className="flex gap-1.5 bg-gray-100 rounded-xl p-1 mb-6">
-            {([['customer', '👤 Customer'], ['worker', '👷 Worker'], ['admin', '🏛️ Admin']] as const).map(([r, label]) => (
-              <button
-                key={r}
-                onClick={() => setRole(r)}
-                className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                  role === r ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+            {([
+              { id: 'customer', label: 'Customer', icon: Users },
+              { id: 'worker', label: 'Worker', icon: UserCheck },
+              { id: 'admin', label: 'Federation Admin', icon: Landmark }
+            ] as const).map(item => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setRole(item.id)}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                    role === item.id ? 'bg-white text-teal-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -113,13 +121,16 @@ export const LoginPage: React.FC = () => {
 
         {/* Demo shortcuts */}
         <div className="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-800">
-          <p className="font-bold mb-2">🎯 SIH 2026 Demo — Quick Access</p>
+          <div className="flex items-center gap-1.5 font-bold mb-2 text-amber-900">
+            <CheckCircle2 className="w-4 h-4 text-amber-700" />
+            <span>SIH 2026 Evaluation — Portal Quick Access</span>
+          </div>
           <div className="flex flex-wrap gap-2">
             {(['customer', 'worker', 'admin'] as const).map(r => (
               <button
                 key={r}
                 onClick={() => navigate(roleRoutes[r])}
-                className="px-3 py-1 bg-amber-100 hover:bg-amber-200 rounded-lg font-semibold capitalize transition-colors"
+                className="px-3 py-1.5 bg-amber-100/80 hover:bg-amber-200 text-amber-950 rounded-lg font-bold capitalize transition-colors"
               >
                 {r} Portal →
               </button>
