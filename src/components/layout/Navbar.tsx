@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Globe, ChevronDown, Menu, X, User, Siren, ShieldCheck } from 'lucide-react';
+import { Globe, ChevronDown, Menu, X, User } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-import { useApp } from '../../context/AppContext';
 import type { SupportedLanguage } from '../../data/mockTranslations';
 
 const LANGUAGES: { code: SupportedLanguage; label: string }[] = [
@@ -13,104 +12,92 @@ const LANGUAGES: { code: SupportedLanguage; label: string }[] = [
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const { language, setLanguage, t } = useLanguage();
-  const { currentRole, setCurrentRole } = useApp();
+  const { language, setLanguage } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
 
   const navLinks = [
-    { label: t.nav.home, to: '/' },
-    { label: t.nav.services, to: '/services' },
-    { label: t.nav.howItWorks, to: '/how-it-works' },
-    { label: t.nav.forWorkers, to: '/for-workers' },
-    { label: t.nav.forCooperatives, to: '/for-cooperatives' },
-    { label: t.nav.aboutUs, to: '/about' },
+    { label: 'Home', to: '/' },
+    { label: 'About', to: '/about' },
+    { label: 'Services', to: '/services' },
+    { label: 'For Workers', to: '/for-workers' },
+    { label: 'For Cooperatives', to: '/for-cooperatives' },
+    { label: 'How It Works', to: '/how-it-works' },
+    { label: 'Contact', to: '/about' },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-surface-200 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-150 shadow-xs">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="flex items-center justify-between h-20">
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="w-10 h-10 bg-coop-900 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <svg viewBox="0 0 32 32" className="w-5 h-5 fill-white">
-                <circle cx="16" cy="10" r="4" />
-                <circle cx="8"  cy="20" r="3" />
-                <circle cx="24" cy="20" r="3" />
-                <path d="M16 14 L8 17 M16 14 L24 17" stroke="white" strokeWidth="2" fill="none" />
+          {/* Logo & Tagline */}
+          <Link to="/" className="flex items-center gap-3 shrink-0 group">
+            {/* Custom Cooperative Leaf Logo */}
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl flex items-center justify-center shadow-xs text-white">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-currentColor stroke-[2.2] stroke-linecap-round stroke-linejoin-round">
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
               </svg>
             </div>
+            
             <div className="leading-tight">
-              <div className="flex items-center gap-1.5">
-                <span className="text-lg font-black text-surface-950 font-display tracking-tight">
-                  {t.appName}
-                </span>
-                <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded">
-                  SIH 2026
-                </span>
-              </div>
-              <span className="text-[10px] text-coop-700 font-semibold block -mt-0.5">
-                Labour Cooperative Platform
+              <span className="text-2xl font-black text-gray-900 tracking-tight font-display">
+                Sahyog
+              </span>
+              <span className="text-[10px] text-gray-400 font-medium block -mt-0.5 whitespace-nowrap">
+                Trusted Services. Fair Work. Stronger Cooperatives.
               </span>
             </div>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navLinks.map(link => (
-              <Link
-                key={link.to + link.label}
-                to={link.to}
-                className={`px-3 py-2 text-xs font-semibold rounded-xl transition-colors ${
-                  location.pathname === link.to
-                    ? 'text-coop-900 bg-coop-50 font-bold'
-                    : 'text-surface-600 hover:text-surface-900 hover:bg-surface-50'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+          {/* Center Nav Links */}
+          <nav className="hidden xl:flex items-center gap-7">
+            {navLinks.map(link => {
+              const isActive = location.pathname === link.to;
+              return (
+                <Link
+                  key={link.to + link.label}
+                  to={link.to}
+                  className={`text-[13px] font-semibold transition-colors relative py-1 ${
+                    isActive
+                      ? 'text-teal-700 font-bold'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {link.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 w-full h-[2px] bg-teal-700 rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
-          {/* Right Side Controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right Controls */}
+          <div className="flex items-center gap-3">
             
-            {/* Prominent Emergency SOS Button */}
-            <Link
-              to="/emergency"
-              className="px-3 sm:px-3.5 py-1.5 sm:py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-xl transition-all shadow-md shadow-rose-900/20 flex items-center gap-1.5 active:scale-95 animate-pulse"
-              title="24/7 Rapid Emergency Dispatch"
-            >
-              <Siren className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t.nav.emergency}</span>
-              <span className="sm:hidden">SOS</span>
-            </Link>
-
             {/* Language Selector */}
             <div className="relative hidden sm:block">
               <button
+                type="button"
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-surface-700 hover:text-surface-900 rounded-xl hover:bg-surface-100 transition-colors border border-surface-200 font-medium"
+                className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-700 hover:text-gray-900 rounded-xl hover:bg-gray-50 border border-gray-200 transition-colors"
               >
-                <Globe className="w-3.5 h-3.5 text-surface-500" />
-                <span>
-                  {LANGUAGES.find(l => l.code === language)?.label ?? 'English'}
-                </span>
-                <ChevronDown className="w-3 h-3 text-surface-400" />
+                <Globe className="w-3.5 h-3.5 text-gray-500" />
+                <span>{LANGUAGES.find(l => l.code === language)?.label ?? 'English'}</span>
+                <ChevronDown className="w-3 h-3 text-gray-400" />
               </button>
 
               {langOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-36 bg-white border border-surface-200 rounded-2xl shadow-xl py-1.5 z-50 animate-scale-up">
+                <div className="absolute right-0 top-full mt-1.5 w-32 bg-white border border-gray-200 rounded-2xl shadow-xl py-1 z-50 animate-scale-up">
                   {LANGUAGES.map(l => (
                     <button
                       key={l.code}
+                      type="button"
                       onClick={() => { setLanguage(l.code); setLangOpen(false); }}
-                      className={`w-full text-left px-3.5 py-2 text-xs font-medium transition-colors ${
-                        language === l.code
-                          ? 'text-coop-900 font-bold bg-coop-50'
-                          : 'text-surface-700 hover:bg-surface-50'
+                      className={`w-full text-left px-3.5 py-2 text-xs transition-colors ${
+                        language === l.code ? 'text-teal-700 font-bold bg-teal-50' : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       {l.label}
@@ -120,105 +107,64 @@ export const Navbar: React.FC = () => {
               )}
             </div>
 
-            {/* Role Portals Quick Links */}
-            <div className="hidden xl:flex items-center gap-1 bg-surface-100 p-1 rounded-xl border border-surface-200 text-[11px]">
-              <Link 
-                to="/customer/dashboard" 
-                onClick={() => setCurrentRole('customer')}
-                className={`px-2 py-1 rounded-lg font-semibold transition-all ${
-                  currentRole === 'customer' && location.pathname.startsWith('/customer')
-                    ? 'bg-white text-surface-900 shadow-xs'
-                    : 'text-surface-600 hover:text-surface-900'
-                }`}
-              >
-                Customer
-              </Link>
-              <Link 
-                to="/worker/dashboard" 
-                onClick={() => setCurrentRole('worker')}
-                className={`px-2 py-1 rounded-lg font-semibold transition-all ${
-                  currentRole === 'worker' && location.pathname.startsWith('/worker')
-                    ? 'bg-white text-surface-900 shadow-xs'
-                    : 'text-surface-600 hover:text-surface-900'
-                }`}
-              >
-                Worker
-              </Link>
-              <Link 
-                to="/admin/dashboard" 
-                onClick={() => setCurrentRole('admin')}
-                className={`px-2 py-1 rounded-lg font-semibold transition-all ${
-                  currentRole === 'admin' && location.pathname.startsWith('/admin')
-                    ? 'bg-white text-surface-900 shadow-xs'
-                    : 'text-surface-600 hover:text-surface-900'
-                }`}
-              >
-                Admin
-              </Link>
-            </div>
-
-            {/* Login / Dashboard Link */}
+            {/* Login (Outline Button) */}
             <Link
               to="/login"
-              className="hidden md:flex items-center gap-1.5 px-3.5 py-2 bg-coop-900 hover:bg-coop-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+              className="hidden sm:inline-flex items-center justify-center px-5 py-2 border border-gray-300 hover:border-gray-400 text-gray-800 text-xs font-bold rounded-xl transition-all hover:bg-gray-50"
             >
-              <User className="w-3.5 h-3.5" />
-              <span>{t.nav.login}</span>
+              Login
+            </Link>
+
+            {/* Sign Up (Solid Green Button) */}
+            <Link
+              to="/signup"
+              className="inline-flex items-center justify-center px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+            >
+              Sign Up
             </Link>
 
             {/* Mobile Hamburger */}
             <button
-              className="lg:hidden p-2 rounded-xl hover:bg-surface-100 text-surface-700"
+              type="button"
+              className="xl:hidden p-2 rounded-xl text-gray-600 hover:bg-gray-100"
               onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Toggle menu"
+              aria-label="Toggle Navigation Menu"
             >
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
+
         </div>
 
-        {/* Mobile Drawer */}
+        {/* Mobile Menu Drawer */}
         {menuOpen && (
-          <div className="lg:hidden pb-4 border-t border-surface-200 pt-3 space-y-2 animate-fade-in">
+          <div className="xl:hidden py-4 border-t border-gray-100 space-y-2 animate-fade-in">
             {navLinks.map(link => (
               <Link
-                key={link.label}
+                key={link.to + link.label}
                 to={link.to}
                 onClick={() => setMenuOpen(false)}
-                className={`block px-3 py-2 text-xs rounded-xl font-semibold transition-colors ${
-                  location.pathname === link.to
-                    ? 'bg-coop-50 text-coop-900 font-bold'
-                    : 'text-surface-700 hover:bg-surface-50'
+                className={`block px-3 py-2 text-xs font-semibold rounded-xl ${
+                  location.pathname === link.to ? 'bg-teal-50 text-teal-700 font-bold' : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
 
-            {/* Emergency SOS Mobile Pill */}
-            <Link
-              to="/emergency"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-center gap-2 p-2.5 bg-rose-600 text-white rounded-xl text-xs font-bold shadow-md"
-            >
-              <Siren className="w-4 h-4" />
-              <span>{t.emergencyTitle}</span>
-            </Link>
-
             {/* Mobile Language Switcher */}
-            <div className="pt-2 border-t border-surface-100 flex items-center justify-between px-3">
-              <span className="text-xs font-semibold text-surface-500 flex items-center gap-1.5">
+            <div className="pt-2 border-t border-gray-100 flex items-center justify-between px-3">
+              <span className="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
                 <Globe className="w-3.5 h-3.5" /> Language
               </span>
               <div className="flex gap-1">
                 {LANGUAGES.map(l => (
                   <button
                     key={l.code}
+                    type="button"
                     onClick={() => setLanguage(l.code)}
                     className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all ${
-                      language === l.code
-                        ? 'bg-coop-900 text-white shadow-xs'
-                        : 'bg-surface-100 text-surface-700 hover:bg-surface-200'
+                      language === l.code ? 'bg-teal-700 text-white' : 'bg-gray-100 text-gray-600'
                     }`}
                   >
                     {l.label}
@@ -227,40 +173,21 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* Mobile Portals Quick Jump */}
-            <div className="pt-2 border-t border-surface-100 grid grid-cols-3 gap-1.5">
-              <Link
-                to="/customer/dashboard"
-                onClick={() => { setCurrentRole('customer'); setMenuOpen(false); }}
-                className="py-2 text-center text-xs font-semibold bg-surface-100 rounded-xl text-surface-800"
-              >
-                Customer App
-              </Link>
-              <Link
-                to="/worker/dashboard"
-                onClick={() => { setCurrentRole('worker'); setMenuOpen(false); }}
-                className="py-2 text-center text-xs font-semibold bg-surface-100 rounded-xl text-surface-800"
-              >
-                Worker App
-              </Link>
-              <Link
-                to="/admin/dashboard"
-                onClick={() => { setCurrentRole('admin'); setMenuOpen(false); }}
-                className="py-2 text-center text-xs font-semibold bg-surface-100 rounded-xl text-surface-800"
-              >
-                Admin Federation
-              </Link>
-            </div>
-
-            {/* Mobile Login Button */}
-            <div className="pt-2">
+            {/* Mobile Auth Links */}
+            <div className="pt-2 grid grid-cols-2 gap-2">
               <Link
                 to="/login"
                 onClick={() => setMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-coop-900 hover:bg-coop-800 text-white text-xs font-bold rounded-xl shadow-xs"
+                className="py-2.5 text-center text-xs font-bold border border-gray-300 rounded-xl text-gray-800"
               >
-                <User className="w-4 h-4" />
-                <span>{t.nav.login} / Register</span>
+                Login
+              </Link>
+              <Link
+                to="/signup"
+                onClick={() => setMenuOpen(false)}
+                className="py-2.5 text-center text-xs font-bold bg-teal-700 text-white rounded-xl"
+              >
+                Sign Up
               </Link>
             </div>
           </div>

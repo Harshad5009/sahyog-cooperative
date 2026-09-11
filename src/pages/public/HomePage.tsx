@@ -1,228 +1,750 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
-  ShieldCheck, 
+  Search, 
+  MapPin, 
+  ChevronDown, 
   ArrowRight, 
-  CheckCircle2, 
+  ShieldCheck, 
+  IndianRupee, 
+  Heart, 
   Users, 
-  Building2, 
+  Zap, 
+  Droplet, 
+  Hammer, 
+  Paintbrush, 
+  Sparkles, 
   HeartHandshake, 
-  Award, 
-  Lock, 
-  TrendingUp,
-  Star,
-  Siren,
-  FileCheck2,
-  Percent,
-  Compass
+  Car, 
+  Sprout, 
+  Wrench, 
+  Settings, 
+  Home, 
+  MoreHorizontal, 
+  GraduationCap, 
+  TrendingUp, 
+  Calendar, 
+  CreditCard, 
+  Star, 
+  Building2,
+  CheckCircle2,
+  Cpu,
+  ShieldAlert
 } from 'lucide-react';
-import { HeroSection } from '../../components/home/HeroSection';
-import { HowItWorks } from '../../components/home/HowItWorks';
-import { ServiceGrid } from '../../components/home/ServiceGrid';
-import { EmergencyBanner } from '../../components/home/EmergencyBanner';
-import { FairPaymentCalculator } from '../../components/home/FairPaymentCalculator';
-import { FairAllocationSection } from '../../components/home/FairAllocationSection';
-import { DemandForecastingPreview } from '../../components/home/DemandForecastingPreview';
-import { CommunityImpact } from '../../components/home/CommunityImpact';
-import { AIProblemClassifier } from '../../components/home/AIProblemClassifier';
-import { MultilingualVoiceDemo } from '../../components/home/MultilingualVoiceDemo';
-import { MOCK_WORKERS } from '../../data/mockWorkers';
-import { SkillPassportCard } from '../../components/worker/SkillPassportCard';
+
+import heroWorkersWide from '../../assets/hero-workers-wide.jpg';
+import workerWoman from '../../assets/worker-woman.jpg';
 
 export const HomePage: React.FC = () => {
-  const featuredWorkers = MOCK_WORKERS.slice(0, 2);
+  const navigate = useNavigate();
+  const [searchService, setSearchService] = useState('');
+  const [searchLocation, setSearchLocation] = useState('Pune, Maharashtra');
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate('/customer/book', { 
+      state: { 
+        initialProblem: searchService || 'General household service required', 
+        location: searchLocation 
+      } 
+    });
+  };
+
+  const handleCategoryClick = (category: string) => {
+    navigate('/customer/book', { state: { initialCategory: category, location: searchLocation } });
+  };
+
+  // 12 Standard Services with Standard Symbols (NO EMOJIS)
+  const popularServices = [
+    {
+      id: 'electrical',
+      name: 'Electrical',
+      startingPrice: '₹400',
+      workers: '124+ workers',
+      icon: Zap,
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-amber-500',
+    },
+    {
+      id: 'plumbing',
+      name: 'Plumbing',
+      startingPrice: '₹350',
+      workers: '98+ workers',
+      icon: Droplet,
+      iconBg: 'bg-sky-50',
+      iconColor: 'text-sky-500',
+    },
+    {
+      id: 'carpentry',
+      name: 'Carpentry',
+      startingPrice: '₹450',
+      workers: '76+ workers',
+      icon: Hammer,
+      iconBg: 'bg-orange-50',
+      iconColor: 'text-orange-500',
+    },
+    {
+      id: 'painting',
+      name: 'Painting',
+      startingPrice: '₹400',
+      workers: '64+ workers',
+      icon: Paintbrush,
+      iconBg: 'bg-rose-50',
+      iconColor: 'text-rose-500',
+    },
+    {
+      id: 'cleaning',
+      name: 'Cleaning',
+      startingPrice: '₹300',
+      workers: '112+ workers',
+      icon: Sparkles,
+      iconBg: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
+    },
+    {
+      id: 'caregiving',
+      name: 'Caregiving',
+      startingPrice: '₹500',
+      workers: '48+ workers',
+      icon: Heart,
+      iconBg: 'bg-red-50',
+      iconColor: 'text-red-500',
+    },
+    {
+      id: 'driver',
+      name: 'Driving',
+      startingPrice: '₹600',
+      workers: '72+ workers',
+      icon: Car,
+      iconBg: 'bg-teal-50',
+      iconColor: 'text-teal-600',
+    },
+    {
+      id: 'gardening',
+      name: 'Gardening',
+      startingPrice: '₹350',
+      workers: '56+ workers',
+      icon: Sprout,
+      iconBg: 'bg-lime-50',
+      iconColor: 'text-lime-600',
+    },
+    {
+      id: 'appliance',
+      name: 'Appliance Repair',
+      startingPrice: '₹450',
+      workers: '83+ workers',
+      icon: Wrench,
+      iconBg: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+    },
+    {
+      id: 'technician',
+      name: 'Technician',
+      startingPrice: '₹500',
+      workers: '69+ workers',
+      icon: Settings,
+      iconBg: 'bg-cyan-50',
+      iconColor: 'text-cyan-600',
+    },
+    {
+      id: 'domestic',
+      name: 'Domestic Help',
+      startingPrice: '₹300',
+      workers: '95+ workers',
+      icon: Home,
+      iconBg: 'bg-slate-50',
+      iconColor: 'text-slate-600',
+    },
+    {
+      id: 'other',
+      name: 'Other Services',
+      startingPrice: '₹400',
+      workers: '42+ workers',
+      icon: MoreHorizontal,
+      iconBg: 'bg-purple-50',
+      iconColor: 'text-purple-600',
+    },
+  ];
 
   return (
-    <div className="bg-white overflow-hidden space-y-0">
-      
-      {/* ─── SECTION 1: HERO WITH AI SEARCH & AUDIO DIAGNOSTICS ─── */}
-      <HeroSection />
+    <div className="bg-white min-h-screen text-gray-900 font-sans overflow-x-hidden">
 
-      {/* ─── SECTION 2: HOW SAHYOG COOPERATIVE PLATFORM WORKS ─── */}
-      <HowItWorks />
-
-      {/* ─── SECTION 3: 12+ POPULAR SERVICES CATALOG ─── */}
-      <ServiceGrid />
-
-      {/* ─── SECTION 4: 24/7 RAPID EMERGENCY DISPATCH CALLOUT ─── */}
-      <EmergencyBanner />
-
-      {/* ─── SECTION 5: WHY SAHYOG — PRIVATE PLATFORM VS COOPERATIVE MODEL ─── */}
-      <section className="py-20 bg-surface-50 border-t border-surface-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-coop-100 text-coop-800 rounded-full text-xs font-bold mb-3">
-              <Compass className="w-3.5 h-3.5" />
-              <span>Paradigm Shift</span>
+      {/* ═════════════════════════════════════════════════════════════════════════════════════
+          SECTION 1: HERO SECTION
+          ═════════════════════════════════════════════════════════════════════════════════════ */}
+      <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 pt-6 sm:pt-10 pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          
+          {/* Left Column: Heading, Subtitle, Search Bar, Trust Badges */}
+          <div className="lg:col-span-6 space-y-6">
+            
+            {/* Cooperative Pill */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-bold text-teal-800">
+              <Sprout className="w-3.5 h-3.5 text-teal-700" />
+              <span className="tracking-wide uppercase text-[10px] sm:text-[11px]">
+                COOPERATIVE-OWNED DIGITAL SERVICE MARKETPLACE
+              </span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-coop-950 tracking-tight font-display mb-4">
-              Private Monopolies vs. Cooperative Ownership
-            </h2>
-            <p className="text-sm sm:text-base text-surface-600 leading-relaxed">
-              Commercial service marketplaces view workers as disposable gig contractors. Sahyog builds worker-owned digital public infrastructure governed by registered Labour Cooperative Federations.
+
+            {/* Main Title */}
+            <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-black leading-[1.12] text-gray-900 tracking-tight font-display">
+              Trusted Services.<br />
+              Fair Work. <span className="text-teal-700">Stronger<br />Cooperatives.</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-sm sm:text-base text-gray-500 max-w-lg leading-relaxed">
+              Sahyog connects households and institutions with verified local workers through cooperative-owned digital infrastructure.
             </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Private Platform Column */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-rose-200 shadow-card space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-rose-100">
-                <span className="text-xs font-bold uppercase tracking-wider text-rose-600">Commercial Gig App</span>
-                <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded">High Exploitation</span>
+            {/* Unified Search Bar Pill */}
+            <form 
+              onSubmit={handleSearchSubmit}
+              className="bg-white border border-gray-200 rounded-2xl sm:rounded-full p-2 sm:p-2 shadow-md flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-xl"
+            >
+              {/* Service Input */}
+              <div className="flex items-center gap-2.5 px-3 py-2 flex-1">
+                <Search className="w-4 h-4 text-gray-400 shrink-0" />
+                <input
+                  type="text"
+                  value={searchService}
+                  onChange={e => setSearchService(e.target.value)}
+                  placeholder="What service do you need?"
+                  className="w-full text-xs sm:text-sm font-medium text-gray-800 placeholder-gray-400 focus:outline-none bg-transparent"
+                />
               </div>
-              <ul className="space-y-3.5 text-xs text-surface-600">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-500 font-black text-sm">✕</span>
-                  <span><strong>25% to 35% Commission Deductions:</strong> Massive margins taken from every household job.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-500 font-black text-sm">✕</span>
-                  <span><strong>Zero Health or Accident Insurance:</strong> Workers bear 100% of workplace medical risks.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-500 font-black text-sm">✕</span>
-                  <span><strong>Algorithmic Exhaustion:</strong> Black-box algorithms penalize workers for declining unscheduled trips.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-500 font-black text-sm">✕</span>
-                  <span><strong>Surge Price Gouging:</strong> Customers pay 2x-3x during rain or emergency distress.</span>
-                </li>
-              </ul>
+
+              <div className="hidden sm:block w-px h-6 bg-gray-200" />
+
+              {/* Location Select */}
+              <div className="flex items-center gap-2 px-3 py-2 shrink-0 relative">
+                <MapPin className="w-4 h-4 text-teal-700 shrink-0" />
+                <select
+                  value={searchLocation}
+                  onChange={e => setSearchLocation(e.target.value)}
+                  className="text-xs sm:text-sm font-semibold text-gray-800 bg-transparent focus:outline-none appearance-none cursor-pointer pr-5"
+                >
+                  <option value="Pune, Maharashtra">Pune, Maharashtra</option>
+                  <option value="Mumbai, Maharashtra">Mumbai, Maharashtra</option>
+                  <option value="Nagpur, Maharashtra">Nagpur, Maharashtra</option>
+                  <option value="Nashik, Maharashtra">Nashik, Maharashtra</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400 pointer-events-none absolute right-2" />
+              </div>
+
+              {/* Search Button */}
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs sm:text-sm font-bold rounded-xl sm:rounded-full shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>Search</span>
+              </button>
+            </form>
+
+            {/* 4 Trust Check Badges */}
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-4 sm:gap-6 pt-1 text-xs text-gray-600 font-semibold">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-teal-700 shrink-0" />
+                <span>Verified Workers</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <IndianRupee className="w-4 h-4 text-teal-700 shrink-0" />
+                <span>Fair Wages</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Heart className="w-4 h-4 text-teal-700 shrink-0" />
+                <span>Worker Welfare</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-teal-700 shrink-0" />
+                <span>Cooperative Owned</span>
+              </div>
             </div>
 
-            {/* Sahyog Cooperative Column */}
-            <div className="bg-gradient-to-br from-emerald-50 to-coop-50/70 rounded-3xl p-6 sm:p-8 border-2 border-emerald-500 shadow-elevated space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-emerald-200">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 font-display">Sahyog Cooperative Platform</span>
-                <span className="text-xs font-bold text-emerald-800 bg-emerald-200 px-2 py-0.5 rounded">Worker Owned</span>
-              </div>
-              <ul className="space-y-3.5 text-xs text-surface-800">
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>80% Direct Worker Take-Home:</strong> Only 10% to cooperative fund and 5% for tech maintenance.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>₹5 Lakh Group Health & Accident Cover:</strong> Institutional medical protection for worker families.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>AI Workload Balancing:</strong> Fair distribution prevents fatigue and distributes jobs democratically.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Transparent Fixed Rates:</strong> Regulated by district societies with zero hidden charges.</span>
-                </li>
-              </ul>
-            </div>
           </div>
+
+          {/* Right Column: Hero Wide Image & Flow Diagram */}
+          <div className="lg:col-span-6 relative flex flex-col items-center">
+            
+            {/* Handwriting Label on Top Right */}
+            <div className="self-end mr-4 mb-2 hidden sm:flex items-center gap-2 text-right">
+              <div className="leading-tight">
+                <span className="text-xs font-bold text-gray-700 block font-handwriting italic">
+                  Local Skilled Workers
+                </span>
+                <span className="text-[11px] text-gray-500 font-handwriting italic">
+                  for a Stronger Tomorrow
+                </span>
+              </div>
+              <svg className="w-8 h-8 text-gray-400 rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M4 4c6 2 12 6 14 12" />
+                <path d="M14 16l4 0l0-4" />
+              </svg>
+            </div>
+
+            {/* Hero Image */}
+            <div className="w-full relative rounded-3xl overflow-hidden shadow-lg border border-gray-100">
+              <img
+                src={heroWorkersWide}
+                alt="Sahyog Verified Cooperative Workers"
+                className="w-full h-[280px] sm:h-[360px] lg:h-[390px] object-cover object-top"
+              />
+            </div>
+
+            {/* Connected Flow Capsule Overlapping Bottom */}
+            <div className="w-[94%] -mt-6 sm:-mt-8 z-20 bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full border border-gray-200/90 shadow-xl px-4 py-2.5 sm:py-3">
+              <div className="grid grid-cols-2 sm:flex sm:items-center justify-between gap-3 text-center">
+                
+                {/* Node 1 */}
+                <div className="flex items-center gap-2 justify-center">
+                  <div className="w-7 h-7 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+                    <Users className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-800 leading-tight">
+                    Households<br />& Institutions
+                  </span>
+                </div>
+
+                <div className="hidden sm:block text-gray-300 font-bold">⇄</div>
+
+                {/* Node 2 */}
+                <div className="flex items-center gap-2 justify-center">
+                  <div className="w-7 h-7 rounded-full bg-teal-700 text-white flex items-center justify-center shrink-0">
+                    <Sprout className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-[11px] font-bold text-teal-900 leading-tight">
+                    Sahyog<br />Platform
+                  </span>
+                </div>
+
+                <div className="hidden sm:block text-gray-300 font-bold">⇄</div>
+
+                {/* Node 3 */}
+                <div className="flex items-center gap-2 justify-center">
+                  <div className="w-7 h-7 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+                    <Building2 className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-800 leading-tight">
+                    Cooperative<br />Federation / Society
+                  </span>
+                </div>
+
+                <div className="hidden sm:block text-gray-300 font-bold">⇄</div>
+
+                {/* Node 4 */}
+                <div className="flex items-center gap-2 justify-center">
+                  <div className="w-7 h-7 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-800 leading-tight">
+                    Verified<br />Workers
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </section>
 
-      {/* ─── SECTION 6: VERIFIED WORKER SKILL PASSPORTS ─── */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+      {/* ═════════════════════════════════════════════════════════════════════════════════════
+          SECTION 2: POPULAR SERVICES & BE A WORKER CARD
+          ═════════════════════════════════════════════════════════════════════════════════════ */}
+      <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-12 border-t border-gray-100">
+        
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-7">
+          <div className="flex items-center gap-2.5">
+            <span className="w-1.5 h-6 bg-teal-700 rounded-full" />
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold mb-3">
-                <Award className="w-3.5 h-3.5" />
-                <span>Verified Professionals</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-surface-900 tracking-tight font-display">
-                Sahyog Digital Skill Passports
+              <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight font-display">
+                Popular Services
               </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Find skilled workers for your home, office or institution.
+              </p>
             </div>
-            <p className="text-xs sm:text-sm text-surface-500 max-w-md">
-              Every technician carries an authenticated QR-verified skill credential validated by Municipal Societies and NSDC India.
+          </div>
+
+          <Link
+            to="/services"
+            className="text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-800 hover:underline flex items-center gap-1"
+          >
+            <span>View All Services</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {/* Content Layout: 12 Services Grid (Left) + Be a Worker Card (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          {/* Left: 12 Service Cards (6 cols x 2 rows on desktop) */}
+          <div className="lg:col-span-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+              {popularServices.map(svc => {
+                const IconComponent = svc.icon;
+                return (
+                  <div
+                    key={svc.id}
+                    onClick={() => handleCategoryClick(svc.id)}
+                    className="bg-white border border-gray-200/80 hover:border-teal-500 rounded-2xl p-3.5 flex flex-col justify-between hover:shadow-md transition-all cursor-pointer group text-left"
+                  >
+                    <div>
+                      {/* Standard Icon Symbol with Tinted Background */}
+                      <div className={`w-9 h-9 ${svc.iconBg} ${svc.iconColor} rounded-xl flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform`}>
+                        <IconComponent className="w-4 h-4" />
+                      </div>
+                      
+                      <h3 className="text-xs font-bold text-gray-900 leading-tight group-hover:text-teal-700 transition-colors">
+                        {svc.name}
+                      </h3>
+                    </div>
+
+                    <div className="mt-3 pt-2 border-t border-gray-100">
+                      <span className="text-[11px] text-gray-500 block">
+                        Starting at <strong className="text-gray-800 font-bold">{svc.startingPrice}</strong>
+                      </span>
+                      <span className="text-[10px] text-gray-400 block mt-0.5">
+                        {svc.workers}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right: Join Our Cooperative - Be a Worker Card */}
+          <div className="lg:col-span-4 bg-teal-50/60 border border-teal-100 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-xs">
+            <div className="space-y-3">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-teal-800 block">
+                JOIN OUR COOPERATIVE
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-gray-900 font-display">
+                Be a Worker
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed max-w-xs">
+                Get verified, get work, get fair wages and welfare support.
+              </p>
+
+              <Link
+                to="/signup"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+              >
+                <span>Register Now</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* Worker Woman Portrait with Transparent Blend */}
+            <div className="my-4 flex justify-center">
+              <img
+                src={workerWoman}
+                alt="Smiling Indian Female Cooperative Worker"
+                className="w-36 sm:w-44 h-44 sm:h-52 object-cover object-top rounded-2xl shadow-md border-2 border-white"
+              />
+            </div>
+
+            {/* 4 Footer Feature Icons */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-teal-100 text-center">
+              <div className="flex flex-col items-center">
+                <GraduationCap className="w-4 h-4 text-teal-700 mb-1" />
+                <span className="text-[10px] font-semibold text-gray-700">Skill Training</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <ShieldCheck className="w-4 h-4 text-teal-700 mb-1" />
+                <span className="text-[10px] font-semibold text-gray-700">Insurance</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <IndianRupee className="w-4 h-4 text-teal-700 mb-1" />
+                <span className="text-[10px] font-semibold text-gray-700">Better Earnings</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <TrendingUp className="w-4 h-4 text-teal-700 mb-1" />
+                <span className="text-[10px] font-semibold text-gray-700">Career Growth</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ═════════════════════════════════════════════════════════════════════════════════════
+          SECTION 3: HOW IT WORKS & TRUSTED BY STATS
+          ═════════════════════════════════════════════════════════════════════════════════════ */}
+      <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-12 border-t border-gray-100">
+        
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2.5">
+            <span className="w-1.5 h-6 bg-teal-700 rounded-full" />
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight font-display">
+                How It Works
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Simple steps to get the service you need.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            to="/how-it-works"
+            className="text-xs sm:text-sm font-bold text-teal-700 hover:text-teal-800 hover:underline flex items-center gap-1"
+          >
+            <span>View Full Process</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          
+          {/* Left: 5 Connected Step Nodes */}
+          <div className="lg:col-span-8 bg-white border border-gray-200/90 rounded-3xl p-6 sm:p-8 shadow-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 sm:gap-2 relative">
+              
+              {/* Step 1 */}
+              <div className="flex flex-col items-center text-center relative z-10">
+                <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
+                  <Search className="w-5 h-5" />
+                  <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">
+                    1
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-gray-900 mt-1">Search Service</h4>
+                <p className="text-[11px] text-gray-400 mt-0.5 leading-tight max-w-[120px]">
+                  Find the right service for your needs
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex flex-col items-center text-center relative z-10">
+                <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
+                  <Cpu className="w-5 h-5" />
+                  <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">
+                    2
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-gray-900 mt-1">AI Finds Worker</h4>
+                <p className="text-[11px] text-gray-400 mt-0.5 leading-tight max-w-[120px]">
+                  Get the best matched verified workers
+                </p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex flex-col items-center text-center relative z-10">
+                <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
+                  <Calendar className="w-5 h-5" />
+                  <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">
+                    3
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-gray-900 mt-1">Book & Schedule</h4>
+                <p className="text-[11px] text-gray-400 mt-0.5 leading-tight max-w-[120px]">
+                  Choose date, time and location
+                </p>
+              </div>
+
+              {/* Step 4 */}
+              <div className="flex flex-col items-center text-center relative z-10">
+                <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
+                  <CreditCard className="w-5 h-5" />
+                  <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">
+                    4
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-gray-900 mt-1">Pay Securely</h4>
+                <p className="text-[11px] text-gray-400 mt-0.5 leading-tight max-w-[120px]">
+                  Multiple payment options (UPI, Card, etc.)
+                </p>
+              </div>
+
+              {/* Step 5 */}
+              <div className="flex flex-col items-center text-center relative z-10">
+                <div className="w-12 h-12 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-md mb-2 relative">
+                  <Star className="w-5 h-5 fill-white" />
+                  <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-teal-700 font-bold text-[10px] rounded-full border border-teal-200 flex items-center justify-center shadow-xs">
+                    5
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-gray-900 mt-1">Rate & Review</h4>
+                <p className="text-[11px] text-gray-400 mt-0.5 leading-tight max-w-[120px]">
+                  Help us improve and support workers
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Right: Trusted by Card */}
+          <div className="lg:col-span-4 bg-gray-50 border border-gray-200/80 rounded-3xl p-6 shadow-xs">
+            <h3 className="text-sm font-black text-gray-900 font-display">
+              Trusted by
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5 mb-5">
+              Homes, Businesses, Institutions, Cooperatives.
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              
+              <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-2xs">
+                <Users className="w-4 h-4 text-teal-700 mx-auto mb-1.5" />
+                <span className="text-sm font-black text-gray-900 block font-display">2,500+</span>
+                <span className="text-[10px] text-gray-400">Verified Workers</span>
+              </div>
+
+              <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-2xs">
+                <Heart className="w-4 h-4 text-teal-700 mx-auto mb-1.5" />
+                <span className="text-sm font-black text-gray-900 block font-display">1,200+</span>
+                <span className="text-[10px] text-gray-400">Happy Customers</span>
+              </div>
+
+              <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-2xs">
+                <ShieldCheck className="w-4 h-4 text-teal-700 mx-auto mb-1.5" />
+                <span className="text-sm font-black text-gray-900 block font-display">98%</span>
+                <span className="text-[10px] text-gray-400">Service Completion</span>
+              </div>
+
+              <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-2xs">
+                <Star className="w-4 h-4 text-amber-500 fill-amber-500 mx-auto mb-1.5" />
+                <span className="text-sm font-black text-gray-900 block font-display">4.8★</span>
+                <span className="text-[10px] text-gray-400">Average Rating</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ═════════════════════════════════════════════════════════════════════════════════════
+          SECTION 4: WHY CHOOSE SAHYOG?
+          ═════════════════════════════════════════════════════════════════════════════════════ */}
+      <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-12 border-t border-gray-100">
+        
+        {/* Section Header */}
+        <div className="flex items-center gap-2.5 mb-7">
+          <span className="w-1.5 h-6 bg-teal-700 rounded-full" />
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight font-display">
+              Why Choose Sahyog?
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              More than just a service marketplace.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {featuredWorkers.map(w => (
-              <SkillPassportCard key={w.id} worker={w} />
-            ))}
-          </div>
         </div>
+
+        {/* 5 Feature Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+          
+          {/* Card 1 */}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xs flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+              <Sprout className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-gray-900">Cooperative Owned</h4>
+              <p className="text-[11px] text-gray-500 mt-0.5 leading-tight">
+                Built for workers, by workers. Not profit-driven.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xs flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
+              <IndianRupee className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-gray-900">Fair wages</h4>
+              <p className="text-[11px] text-gray-500 mt-0.5 leading-tight">
+                Transparent earnings for a better tomorrow.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xs flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
+              <Heart className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-gray-900">Worker welfare</h4>
+              <p className="text-[11px] text-gray-500 mt-0.5 leading-tight">
+                Insurance, training & support for a secure future.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 4 */}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xs flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-cyan-50 text-cyan-700 flex items-center justify-center shrink-0 mt-0.5">
+              <Users className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-gray-900">Local Employment</h4>
+              <p className="text-[11px] text-gray-500 mt-0.5 leading-tight">
+                Strengthening local communities.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 5 */}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xs flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-mint-50 text-teal-800 flex items-center justify-center shrink-0 mt-0.5">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-gray-900">Trust & Safety</h4>
+              <p className="text-[11px] text-gray-500 mt-0.5 leading-tight">
+                Verified workers, secure payments, real reviews.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
       </section>
 
-      {/* ─── SECTION 7: FAIR WAGE CALCULATOR (80/20 ECONOMICS) ─── */}
-      <FairPaymentCalculator />
-
-      {/* ─── SECTION 8: AI MULTILINGUAL VOICE & PROBLEM CLASSIFIER ─── */}
-      <AIProblemClassifier />
-
-      {/* ─── SECTION 9: AI FAIR WORKFORCE ALLOCATION ─── */}
-      <FairAllocationSection />
-
-      {/* ─── SECTION 10: DEMAND FORECASTING FOR SOCIETIES ─── */}
-      <DemandForecastingPreview />
-
-      {/* ─── SECTION 11: MULTILINGUAL SYSTEM LIVE DEMO ─── */}
-      <MultilingualVoiceDemo />
-
-      {/* ─── SECTION 12: COMMUNITY IMPACT & VERIFIED METRICS ─── */}
-      <CommunityImpact />
-
-      {/* ─── SECTION 13: COOPERATIVE NETWORK & FEDERATION GOVERNANCE ─── */}
-      <section className="py-16 bg-surface-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Institutional Backbone</span>
-            <h3 className="text-2xl sm:text-3xl font-black mt-2 font-display">
-              Federation Governance Hierarchy
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center text-xs">
-            <div className="p-6 bg-surface-800/80 rounded-2xl border border-surface-700 space-y-2">
-              <Building2 className="w-8 h-8 text-emerald-400 mx-auto" />
-              <h4 className="font-bold text-sm text-white">State Labour Cooperative Federation</h4>
-              <p className="text-surface-400">Apex policy supervision, insurance underwriting, and dispute mediation.</p>
-            </div>
-            <div className="p-6 bg-surface-800/80 rounded-2xl border border-surface-700 space-y-2">
-              <Users className="w-8 h-8 text-emerald-400 mx-auto" />
-              <h4 className="font-bold text-sm text-white">Primary Cooperative Societies</h4>
-              <p className="text-surface-400">Local ward level management, worker KYC, equipment subsidy, and skill certification.</p>
-            </div>
-            <div className="p-6 bg-surface-800/80 rounded-2xl border border-surface-700 space-y-2">
-              <ShieldCheck className="w-8 h-8 text-emerald-400 mx-auto" />
-              <h4 className="font-bold text-sm text-white">Verified Cooperative Members</h4>
-              <p className="text-surface-400">Voting shareholder technicians with guaranteed minimum daily wage floor and patronage dividend.</p>
-            </div>
-          </div>
+      {/* ═════════════════════════════════════════════════════════════════════════════════════
+          SECTION 5: BOTTOM MOTTO & FLUID GREEN WAVE
+          ═════════════════════════════════════════════════════════════════════════════════════ */}
+      <section className="pt-6 pb-0 overflow-hidden relative text-center">
+        
+        {/* Decorative Motto Line */}
+        <div className="flex items-center justify-center gap-3 mb-6 text-teal-800 text-xs font-bold tracking-wide">
+          <span className="w-12 h-px bg-teal-300" />
+          <span className="italic font-display">Together We Build a Stronger, Fairer Future</span>
+          <span className="w-12 h-px bg-teal-300" />
         </div>
-      </section>
 
-      {/* ─── SECTION 14: BOTTOM CALL TO ACTION ─── */}
-      <section className="py-20 bg-gradient-to-r from-coop-950 via-coop-900 to-emerald-950 text-white relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 relative z-10">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30">
-            SIH 2026 Ready Platform
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-black font-display tracking-tight">
-            Empower Local Workers. Book Trusted Services.
-          </h2>
-          <p className="text-sm sm:text-base text-surface-300 max-w-2xl mx-auto leading-relaxed">
-            Experience fair digital governance. Fast booking, certified technicians, 90-day guarantee, and 100% transparent cooperative pricing.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-            <Link
-              to="/customer/book"
-              className="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-surface-950 font-black text-sm rounded-2xl shadow-xl transition-all active:scale-95 flex items-center gap-2"
-            >
-              <span>Book a Service Now</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/emergency"
-              className="px-6 py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-2xl shadow-md transition-all flex items-center gap-2"
-            >
-              <Siren className="w-4 h-4 animate-bounce" />
-              <span>Emergency 24/7 SOS</span>
-            </Link>
-          </div>
+        {/* Curved Green Cooperative Wave SVG matching screenshot */}
+        <div className="w-full overflow-hidden leading-none">
+          <svg
+            viewBox="0 0 1440 90"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-14 sm:h-20 lg:h-24 block preserve-3d"
+          >
+            <path
+              d="M0,45 C320,85 640,10 960,55 C1200,90 1360,35 1440,25 L1440,90 L0,90 Z"
+              fill="#0F766E"
+            />
+            <path
+              d="M0,60 C280,30 580,75 880,40 C1140,10 1340,65 1440,50 L1440,90 L0,90 Z"
+              fill="#0D6A63"
+              opacity="0.6"
+            />
+          </svg>
         </div>
+
       </section>
 
     </div>
