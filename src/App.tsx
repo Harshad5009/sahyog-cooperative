@@ -19,6 +19,7 @@ import { ForCooperativesPage } from './pages/public/ForCooperativesPage';
 import { AboutPage } from './pages/public/AboutPage';
 import { LoginPage } from './pages/public/LoginPage';
 import { SignupPage } from './pages/public/SignupPage';
+import { EmergencyPage } from './pages/public/EmergencyPage';
 
 // Customer Pages
 import { CustomerDashboard } from './pages/customer/CustomerDashboard';
@@ -72,6 +73,7 @@ export function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/emergency" element={<EmergencyPage />} />
             </Route>
 
             {/* Customer Portal */}
