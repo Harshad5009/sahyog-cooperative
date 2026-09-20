@@ -6,11 +6,24 @@ import { AppError } from '../middleware/errorHandler';
 import { z } from 'zod';
 
 const sosSchema = z.object({
-  lat: z.number(),
-  lng: z.number(),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   bookingId: z.string().optional(),
   triggerType: z.enum(['MANUAL','AUTO_INACTIVITY','SHAKE_GESTURE']).default('MANUAL'),
-});
+  batteryLevel: z.number().optional(),
+  address: z.string().optional(),
+  natureOfEmergency: z.string().optional(),
+}).transform(val => ({
+  lat: (val.lat !== undefined ? val.lat : val.latitude) ?? 0,
+  lng: (val.lng !== undefined ? val.lng : val.longitude) ?? 0,
+  bookingId: val.bookingId,
+  triggerType: val.triggerType,
+  batteryLevel: val.batteryLevel,
+  address: val.address,
+  natureOfEmergency: val.natureOfEmergency,
+}));
 
 export const triggerSos = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {

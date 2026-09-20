@@ -52,25 +52,32 @@ export const updateWorkerLocation = async (req: AuthRequest, res: Response, next
 
 export const getNearbyWorkers = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const lat = parseFloat(req.query.lat as string);
-    const lng = parseFloat(req.query.lng as string);
+    const latStr = req.query.lat as string;
+    const lngStr = req.query.lng as string;
     const category = req.query.category as string;
     const radiusKm = parseFloat(req.query.radius as string) || 15;
 
-    if (isNaN(lat) || isNaN(lng)) throw new AppError('lat and lng query params required', 400);
-
-    const workers = await Worker.find({
+    const query: any = {
       verificationStatus: 'VERIFIED',
       isAvailable: true,
       kycVerified: true,
       ...(category && { primarySkillCategory: category }),
-      currentLocation: {
-        $nearSphere: {
-          $geometry: { type: 'Point', coordinates: [lng, lat] },
-          $maxDistance: radiusKm * 1000,
-        },
-      },
-    })
+    };
+
+    if (latStr && lngStr) {
+      const lat = parseFloat(latStr);
+      const lng = parseFloat(lngStr);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        query.currentLocation = {
+          $nearSphere: {
+            $geometry: { type: 'Point', coordinates: [lng, lat] },
+            $maxDistance: radiusKm * 1000,
+          },
+        };
+      }
+    }
+
+    const workers = await Worker.find(query)
       .limit(20)
       .populate('userId', 'name')
       .select('-passwordHash')

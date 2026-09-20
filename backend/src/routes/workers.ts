@@ -18,8 +18,12 @@ router.use(authenticate);
 
 router.get('/rate-card', getRateCardHandler);                           // any auth
 router.get('/nearby', getNearbyWorkers);                                // any auth
+router.get('/', getNearbyWorkers);                                      // any auth
 router.get('/me', authorize('WORKER'), getWorkerProfile);
+router.get('/profile', authorize('WORKER'), getWorkerProfile);
 router.patch('/me/availability', authorize('WORKER'), updateWorkerAvailability);
+router.patch('/availability', authorize('WORKER'), updateWorkerAvailability);
 router.patch('/me/location', authorize('WORKER'), updateWorkerLocation);
+router.patch('/location', authorize('WORKER'), updateWorkerLocation);
 
 export default router;

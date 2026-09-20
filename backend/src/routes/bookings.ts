@@ -19,6 +19,7 @@ router.use(authenticate);
 
 // Bookings
 router.get('/', getMyBookings);
+router.get('/my-bookings', getMyBookings);
 router.get('/:id', getBookingById);
 router.post('/', authorize('CUSTOMER'), createBooking);
 router.patch('/:id/status', updateBookingStatus);

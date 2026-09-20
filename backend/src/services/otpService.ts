@@ -1,5 +1,6 @@
 import { OtpToken } from '../models/OtpToken';
 import { env } from '../config/env';
+import { AppError } from '../middleware/errorHandler';
 
 const isDev = env.NODE_ENV !== 'production';
 
@@ -32,16 +33,16 @@ export const verifyOtp = async (phone: string, otp: string, purpose: 'LOGIN' | '
     expiresAt: { $gt: new Date() },
   });
 
-  if (!record) throw new Error('OTP expired or not found');
+  if (!record) throw new AppError('OTP expired or not found. Please request a new OTP.', 400);
 
   if (record.attempts >= 5) {
     await OtpToken.deleteOne({ _id: record._id });
-    throw new Error('Too many failed attempts. Please request a new OTP.');
+    throw new AppError('Too many failed attempts. Please request a new OTP.', 429);
   }
 
   if (record.otp !== otp) {
     await OtpToken.updateOne({ _id: record._id }, { $inc: { attempts: 1 } });
-    throw new Error('Invalid OTP');
+    throw new AppError('Invalid OTP', 400);
   }
 
   await OtpToken.updateOne({ _id: record._id }, { isUsed: true });

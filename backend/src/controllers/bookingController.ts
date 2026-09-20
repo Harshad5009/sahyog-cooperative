@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import { z } from 'zod';
 import { Booking } from '../models/Booking';
 import { Worker } from '../models/Worker';
@@ -59,7 +60,11 @@ export const getMyBookings = async (req: AuthRequest, res: Response, next: NextF
 // --- Get single booking ---
 export const getBookingById = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const booking = await Booking.findById(req.params.id)
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      throw new AppError('Booking not found', 404);
+    }
+    const booking = await Booking.findById(id)
       .populate('workerId', 'userId membershipNumber ratingAverage skills primarySkillCategory avatarUrl')
       .lean();
     if (!booking) throw new AppError('Booking not found', 404);

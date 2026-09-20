@@ -8,20 +8,30 @@ import { sendOtp, verifyOtp } from '../services/otpService';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../services/jwtService';
 import { AppError } from '../middleware/errorHandler';
 
+const phoneSchema = z.string().transform(raw => {
+  let cleaned = raw.replace(/\D/g, '');
+  if (cleaned.length === 12 && cleaned.startsWith('91')) {
+    cleaned = cleaned.slice(2);
+  } else if (cleaned.length === 11 && cleaned.startsWith('0')) {
+    cleaned = cleaned.slice(1);
+  }
+  return cleaned;
+}).refine(p => /^[6-9]\d{9}$/.test(p), { message: 'Invalid Indian mobile number (10 digits required)' });
+
 // --- Schemas ---
 const sendOtpSchema = z.object({
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid Indian mobile number'),
+  phone: phoneSchema,
   purpose: z.enum(['LOGIN','REGISTER','RESET']),
 });
 
 const verifyOtpSchema = z.object({
-  phone: z.string().regex(/^[6-9]\d{9}$/),
+  phone: phoneSchema,
   otp: z.string().length(6),
   purpose: z.enum(['LOGIN','REGISTER','RESET']),
 });
 
 const registerSchema = z.object({
-  phone: z.string().regex(/^[6-9]\d{9}$/),
+  phone: phoneSchema,
   otp: z.string().length(6),
   name: z.string().min(2).max(60),
   email: z.string().email().optional(),
@@ -31,7 +41,7 @@ const registerSchema = z.object({
 });
 
 const loginSchema = z.object({
-  phone: z.string().regex(/^[6-9]\d{9}$/),
+  phone: phoneSchema,
   otp: z.string().length(6),
 });
 

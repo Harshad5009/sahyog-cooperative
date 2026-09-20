@@ -47,8 +47,12 @@ app.use(cors({
 }));
 
 // ── Rate limiting ──────────────────────────────────────────
-const globalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false });
-const authLimiter   = rateLimit({ windowMs: 15 * 60 * 1000, max: 15,  message: { success: false, message: 'Too many auth requests. Try after 15 minutes.' } });
+const globalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false });
+const authLimiter   = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: env.NODE_ENV === 'production' ? 60 : 500,
+  message: { success: false, message: 'Too many auth requests. Try after 15 minutes.' }
+});
 app.use(globalLimiter);
 
 // ── Body parsing ───────────────────────────────────────────
