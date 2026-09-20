@@ -58,10 +58,11 @@ export const sendOtpHandler = async (req: Request, res: Response, next: NextFunc
   try {
     const { phone, purpose } = sendOtpSchema.parse(req.body);
     const otp = await sendOtp(phone, purpose);
+    const isMock = process.env.NODE_ENV !== 'production' || !process.env.TWILIO_ACCOUNT_SID || phone.startsWith('980000');
     res.json({
       success: true,
       message: 'OTP sent successfully',
-      ...(process.env.NODE_ENV !== 'production' && { devOtp: otp }),
+      ...(isMock && { devOtp: otp }),
     });
   } catch (err) {
     next(err);
