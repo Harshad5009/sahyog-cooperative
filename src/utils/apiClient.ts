@@ -34,7 +34,12 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     ...(options.headers ?? {}),
   };
 
-  const res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+  } catch {
+    throw new Error('Cannot reach server. If this is your first visit, the backend may be waking up (Render free tier takes ~30s). Please try again in a moment.');
+  }
 
   // Silent token refresh on 401
   if (res.status === 401) {
