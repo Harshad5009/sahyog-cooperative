@@ -170,12 +170,12 @@ export const LoginPage: React.FC = () => {
               className="py-2 px-3 bg-amber-100/80 hover:bg-amber-200 text-amber-950 rounded-lg font-bold transition-colors disabled:opacity-50">
               {authLoading ? '…' : 'Worker →'}
             </button>
-            <button onClick={() => quickLogin('9800000001', 'admin')} disabled={authLoading}
+            <button onClick={() => quickLogin('9800000000', 'admin')} disabled={authLoading}
               className="py-2 px-3 bg-amber-100/80 hover:bg-amber-200 text-amber-950 rounded-lg font-bold transition-colors disabled:opacity-50">
               {authLoading ? '…' : 'Admin →'}
             </button>
           </div>
-          <p className="text-[10px] text-amber-700 mt-2">Dev OTP auto-filled • Phone: 9800000001 (customer/admin) | 9800000100 (worker)</p>
+          <p className="text-[10px] text-amber-700 mt-2">Dev OTP auto-filled • Customer: 9800000001 | Worker: 9800000100 | Admin: 9800000000</p>
         </div>
       </div>
     </div>
