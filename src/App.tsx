@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
@@ -20,6 +21,7 @@ import { AboutPage } from './pages/public/AboutPage';
 import { LoginPage } from './pages/public/LoginPage';
 import { SignupPage } from './pages/public/SignupPage';
 import { EmergencyPage } from './pages/public/EmergencyPage';
+import { VerifyWorkerPage } from './pages/public/VerifyWorkerPage';
 
 // Customer Pages
 import { CustomerDashboard } from './pages/customer/CustomerDashboard';
@@ -45,7 +47,7 @@ import { AdminMapPage } from './pages/admin/AdminMapPage';
 import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
 import { AdminWelfarePage } from './pages/admin/AdminWelfarePage';
 
-// Public layout wrapper with Navbar and Footer
+// Public layout wrapper
 const PublicLayoutWrapper = () => (
   <div className="min-h-screen flex flex-col bg-surface-50 text-surface-900">
     <Navbar />
@@ -59,58 +61,62 @@ const PublicLayoutWrapper = () => (
 export function App() {
   return (
     <LanguageProvider>
-      <AppProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes with Navbar & Footer */}
-            <Route element={<PublicLayoutWrapper />}>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/services" element={<ServicesPage />} />
-              <Route path="/services/:serviceId" element={<ServiceDetailPage />} />
-              <Route path="/how-it-works" element={<HowItWorksPage />} />
-              <Route path="/for-workers" element={<ForWorkersPage />} />
-              <Route path="/for-cooperatives" element={<ForCooperativesPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/emergency" element={<EmergencyPage />} />
-            </Route>
+      <AuthProvider>
+        <AppProvider>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route element={<PublicLayoutWrapper />}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/services" element={<ServicesPage />} />
+                <Route path="/services/:serviceId" element={<ServiceDetailPage />} />
+                <Route path="/how-it-works" element={<HowItWorksPage />} />
+                <Route path="/for-workers" element={<ForWorkersPage />} />
+                <Route path="/for-cooperatives" element={<ForCooperativesPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/emergency" element={<EmergencyPage />} />
+                <Route path="/verify/worker/:membershipId" element={<VerifyWorkerPage />} />
+                <Route path="/verify/:membershipId" element={<VerifyWorkerPage />} />
+              </Route>
 
-            {/* Customer Portal */}
-            <Route path="/customer" element={<CustomerLayout />}>
-              <Route path="dashboard" element={<CustomerDashboard />} />
-              <Route path="book" element={<CustomerBookingPage />} />
-              <Route path="bookings" element={<CustomerBookingsPage />} />
-              <Route path="payments" element={<CustomerPaymentsPage />} />
-              <Route path="profile" element={<CustomerProfilePage />} />
-            </Route>
+              {/* Customer Portal */}
+              <Route path="/customer" element={<CustomerLayout />}>
+                <Route path="dashboard" element={<CustomerDashboard />} />
+                <Route path="book" element={<CustomerBookingPage />} />
+                <Route path="bookings" element={<CustomerBookingsPage />} />
+                <Route path="payments" element={<CustomerPaymentsPage />} />
+                <Route path="profile" element={<CustomerProfilePage />} />
+              </Route>
 
-            {/* Worker Portal */}
-            <Route path="/worker" element={<WorkerLayout />}>
-              <Route path="dashboard" element={<WorkerDashboard />} />
-              <Route path="jobs" element={<WorkerJobsPage />} />
-              <Route path="earnings" element={<WorkerEarningsPage />} />
-              <Route path="skills" element={<WorkerSkillsPage />} />
-              <Route path="welfare" element={<WorkerWelfarePage />} />
-              <Route path="profile" element={<WorkerProfilePage />} />
-            </Route>
+              {/* Worker Portal */}
+              <Route path="/worker" element={<WorkerLayout />}>
+                <Route path="dashboard" element={<WorkerDashboard />} />
+                <Route path="jobs" element={<WorkerJobsPage />} />
+                <Route path="earnings" element={<WorkerEarningsPage />} />
+                <Route path="skills" element={<WorkerSkillsPage />} />
+                <Route path="welfare" element={<WorkerWelfarePage />} />
+                <Route path="profile" element={<WorkerProfilePage />} />
+              </Route>
 
-            {/* Federation Admin Portal */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="workers" element={<AdminWorkersPage />} />
-              <Route path="bookings" element={<AdminBookingsPage />} />
-              <Route path="demand" element={<AdminDemandPage />} />
-              <Route path="map" element={<AdminMapPage />} />
-              <Route path="analytics" element={<AdminAnalyticsPage />} />
-              <Route path="welfare" element={<AdminWelfarePage />} />
-            </Route>
-          </Routes>
+              {/* Federation Admin Portal */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="workers" element={<AdminWorkersPage />} />
+                <Route path="bookings" element={<AdminBookingsPage />} />
+                <Route path="demand" element={<AdminDemandPage />} />
+                <Route path="map" element={<AdminMapPage />} />
+                <Route path="analytics" element={<AdminAnalyticsPage />} />
+                <Route path="welfare" element={<AdminWelfarePage />} />
+              </Route>
+            </Routes>
 
-          {/* Global Discreet SIH Demo Presentation Floating Controller */}
-          <DemoFlowController />
-        </Router>
-      </AppProvider>
+            {/* Global SIH Demo Floating Controller */}
+            <DemoFlowController />
+          </Router>
+        </AppProvider>
+      </AuthProvider>
     </LanguageProvider>
   );
 }

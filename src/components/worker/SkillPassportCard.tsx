@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Award, 
   ShieldCheck, 
@@ -9,7 +10,8 @@ import {
   Download, 
   Calendar, 
   MapPin, 
-  Users 
+  Users,
+  ExternalLink
 } from 'lucide-react';
 import type { Worker } from '../../types';
 import { Rating } from '../common/Rating';
@@ -56,9 +58,13 @@ export const SkillPassportCard: React.FC<SkillPassportCardProps> = ({ worker }) 
             </div>
           </div>
 
-          {/* QR Verification Badge */}
-          <div className="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20 flex flex-col items-center gap-1.5 shrink-0">
-            <div className="w-14 h-14 bg-white rounded-xl p-1 flex items-center justify-center">
+          {/* QR Verification Badge with clickable verification link */}
+          <Link
+            to={`/verify/worker/${worker.membershipId}`}
+            title="Scan or click to view official public verification certificate"
+            className="bg-white/10 hover:bg-white/20 transition-all backdrop-blur-md p-3 rounded-2xl border border-white/20 flex flex-col items-center gap-1.5 shrink-0 group cursor-pointer"
+          >
+            <div className="w-14 h-14 bg-white rounded-xl p-1 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
               {/* Simulated QR Pattern */}
               <div className="w-full h-full border-2 border-surface-900 rounded grid grid-cols-3 gap-0.5 p-0.5">
                 <div className="bg-surface-900 rounded-xs" />
@@ -72,10 +78,11 @@ export const SkillPassportCard: React.FC<SkillPassportCardProps> = ({ worker }) 
                 <div className="bg-surface-900 rounded-xs" />
               </div>
             </div>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300">
-              Verified QR
+            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1">
+              <span>Verified QR</span>
+              <ExternalLink className="w-2.5 h-2.5" />
             </span>
-          </div>
+          </Link>
         </div>
       </div>
 
@@ -205,15 +212,21 @@ export const SkillPassportCard: React.FC<SkillPassportCardProps> = ({ worker }) 
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => alert('Digital Passport PDF exported successfully.')}
-              className="px-3.5 py-1.5 bg-surface-100 hover:bg-surface-200 text-surface-800 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
+              onClick={() => {
+                window.open(`/verify/worker/${worker.membershipId}`, '_blank');
+              }}
+              className="px-3.5 py-1.5 bg-surface-100 hover:bg-surface-200 text-surface-800 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export PDF</span>
+              <span>Verify / Export PDF</span>
             </button>
             <button
-              onClick={() => alert('Public verification link copied to clipboard.')}
-              className="px-3.5 py-1.5 bg-coop-900 hover:bg-coop-800 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
+              onClick={() => {
+                const url = `${window.location.origin}/verify/worker/${worker.membershipId}`;
+                navigator.clipboard.writeText(url);
+                alert(`Public verification credential link copied to clipboard:\n${url}`);
+              }}
+              className="px-3.5 py-1.5 bg-coop-900 hover:bg-coop-800 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
             >
               <Share2 className="w-3.5 h-3.5" />
               <span>Share Credential</span>

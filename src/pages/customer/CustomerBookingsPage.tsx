@@ -1,448 +1,276 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useApp } from '../../context/AppContext';
-import { 
-  ArrowRight, 
-  Phone, 
-  Navigation, 
-  CheckCircle2, 
-  Star, 
-  Siren, 
-  FileText, 
-  Printer, 
-  X,
-  Clock,
-  MapPin,
-  ShieldCheck,
-  ChevronDown,
-  ChevronUp,
-  RotateCcw,
-  Tag
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { changeRequestApi } from '../../utils/apiClient';
+import {
+  Plus, Clock, MapPin, Star, CheckCircle2, AlertCircle,
+  ChevronDown, ChevronUp, Loader2, RefreshCw, ArrowRight,
+  Siren, AlertTriangle, X, Send
 } from 'lucide-react';
-import type { Booking } from '../../types';
-import { PaymentStatusBadge } from '../../components/common/PaymentStatusBadge';
-import { ChangeRequestAlert } from '../../components/booking/ChangeRequestAlert';
-import { RateCardBreakdown } from '../../components/common/RateCardBreakdown';
-import { calculateRateCardPricing } from '../../utils/pricingAndPayment';
+
+const STATUS_COLORS: Record<string, string> = {
+  PENDING_MATCH: 'bg-amber-100 text-amber-700',
+  ALLOCATED: 'bg-blue-100 text-blue-700',
+  ACCEPTED_BY_WORKER: 'bg-indigo-100 text-indigo-700',
+  EN_ROUTE: 'bg-cyan-100 text-cyan-700',
+  ARRIVED: 'bg-violet-100 text-violet-700',
+  IN_PROGRESS: 'bg-purple-100 text-purple-700',
+  COMPLETED: 'bg-emerald-100 text-emerald-700',
+  CANCELLED: 'bg-red-100 text-red-600',
+  DISPUTED: 'bg-orange-100 text-orange-700',
+};
+
+const PAYMENT_LABELS: Record<string, { label: string; color: string }> = {
+  PAYMENT_PENDING: { label: 'Payment Pending', color: 'text-gray-500' },
+  PAYMENT_HELD: { label: 'Payment Protected/Held', color: 'text-amber-600' },
+  ADDITIONAL_REQUESTED: { label: 'Additional Amount Requested', color: 'text-orange-600' },
+  PAYMENT_RELEASED: { label: 'Payment Released', color: 'text-emerald-600' },
+  REFUND_INITIATED: { label: 'Refund Initiated', color: 'text-red-500' },
+  REFUND_COMPLETED: { label: 'Refund Completed', color: 'text-pink-600' },
+};
+
+interface ReviewForm { rating: number; comment: string; timeliness: number; qualityOfWork: number; professionalism: number; cleanliness: number; }
 
 export const CustomerBookingsPage: React.FC = () => {
-  const { 
-    bookings, 
-    updateBookingStatus, 
-    submitCustomerReview, 
-    respondToChangeRequest,
-    releasePayment,
-    initiateRefund
-  } = useApp();
+  const { bookings, fetchBookings, submitReview, respondToChangeRequest } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [crMap, setCrMap] = useState<Record<string, any[]>>({});
+  const [crLoading, setCrLoading] = useState<string | null>(null);
+  const [reviewBooking, setReviewBooking] = useState<string | null>(null);
+  const [reviewForm, setReviewForm] = useState<ReviewForm>({ rating: 5, comment: '', timeliness: 5, qualityOfWork: 5, professionalism: 5, cleanliness: 5 });
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState('');
+  const { getChangeRequests } = useAuth();
 
-  const [tab, setTab] = useState<'ongoing' | 'upcoming' | 'completed' | 'cancelled'>('ongoing');
-  const [inspectedInvoice, setInspectedInvoice] = useState<Booking | null>(null);
-  const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState('');
-  const [expandedRateCardId, setExpandedRateCardId] = useState<string | null>(null);
+  const load = async () => { setLoading(true); await fetchBookings(); setLoading(false); };
+  useEffect(() => { load(); }, []);
 
-  const upcoming = bookings.filter(b => b.status === 'allocated');
-  const ongoing = bookings.filter(b => ['accepted_by_worker', 'en_route', 'arrived', 'in_progress'].includes(b.status));
-  const completed = bookings.filter(b => b.status === 'completed');
-  const cancelled = bookings.filter(b => b.status === 'cancelled');
-
-  const list = 
-    tab === 'upcoming' ? upcoming : 
-    tab === 'ongoing' ? ongoing : 
-    tab === 'completed' ? completed : 
-    cancelled;
-
-  const STATUS_COLORS: Record<string, string> = {
-    allocated: 'bg-blue-100 text-blue-800',
-    accepted_by_worker: 'bg-purple-100 text-purple-800',
-    en_route: 'bg-amber-100 text-amber-800',
-    arrived: 'bg-orange-100 text-orange-800',
-    in_progress: 'bg-emerald-100 text-emerald-800 font-bold',
-    completed: 'bg-surface-100 text-surface-700',
-    cancelled: 'bg-rose-100 text-rose-800',
+  const loadCr = async (bookingId: string) => {
+    setCrLoading(bookingId);
+    const res = await getChangeRequests(bookingId) as any;
+    if (res?.result?.data) setCrMap(prev => ({ ...prev, [bookingId]: res.result.data }));
+    setCrLoading(null);
   };
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (reviewBooking) {
-      submitCustomerReview(reviewBooking.id, reviewRating, reviewComment || 'Great cooperative service!');
-      setReviewBooking(null);
-    }
+  const handleExpand = async (id: string) => {
+    const next = expanded === id ? null : id;
+    setExpanded(next);
+    if (next && !crMap[next]) await loadCr(next);
   };
+
+  const handleCrRespond = async (crId: string, bookingId: string, action: 'APPROVED' | 'REJECTED') => {
+    await respondToChangeRequest(crId, action);
+    await loadCr(bookingId);
+    await fetchBookings();
+  };
+
+  const handleSubmitReview = async (bookingId: string) => {
+    setReviewLoading(true);
+    await submitReview(bookingId, reviewForm);
+    setReviewLoading(false);
+    setReviewBooking(null);
+    setReviewSuccess(bookingId);
+    setTimeout(() => setReviewSuccess(null), 4000);
+  };
+
+  const displayed = bookings.filter(b => !filterStatus || b.status === filterStatus);
 
   return (
-    <div className="space-y-6">
-      
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-surface-900 font-display">
-            My Service Bookings
-          </h1>
-          <p className="text-xs text-surface-500">
-            Track active dispatches, view transparent rate cards, approve change requests, and release escrow payments.
-          </p>
+          <h1 className="text-xl font-black text-surface-900 font-display">My Bookings</h1>
+          <p className="text-xs text-surface-500 mt-0.5">Live data from SAHYOG platform · {bookings.length} bookings</p>
         </div>
-        <Link 
-          to="/customer/book" 
-          className="flex items-center gap-1.5 px-4 py-2 bg-coop-900 hover:bg-coop-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors self-start sm:self-auto"
-        >
-          + Book New Service
-        </Link>
-      </div>
-
-      {/* 4 Tabs: Ongoing, Upcoming, Completed, Cancelled */}
-      <div className="flex flex-wrap gap-1.5 p-1 bg-surface-100 rounded-2xl w-fit text-xs font-bold">
-        {[
-          { id: 'ongoing', label: `Ongoing Dispatches (${ongoing.length})` },
-          { id: 'upcoming', label: `Upcoming (${upcoming.length})` },
-          { id: 'completed', label: `Completed (${completed.length})` },
-          { id: 'cancelled', label: `Cancelled (${cancelled.length})` },
-        ].map(t => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id as any)}
-            className={`px-3.5 py-1.5 rounded-xl transition-all ${
-              tab === t.id
-                ? 'bg-white text-surface-900 shadow-xs'
-                : 'text-surface-500 hover:text-surface-800'
-            }`}
-          >
-            {t.label}
+        <div className="flex gap-2">
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+            className="px-3 py-2 text-xs bg-white border border-surface-200 rounded-xl focus:outline-none cursor-pointer">
+            <option value="">All</option>
+            {Object.keys(STATUS_COLORS).map(s => <option key={s} value={s}>{s.replace(/_/g,' ')}</option>)}
+          </select>
+          <button onClick={load} disabled={loading}
+            className="flex items-center gap-1.5 px-4 py-2 bg-coop-900 text-white text-xs font-bold rounded-xl hover:bg-coop-800 disabled:opacity-60 transition-colors">
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />Refresh
           </button>
-        ))}
+        </div>
       </div>
 
-      {/* Bookings List */}
-      <div className="space-y-5">
-        {list.length === 0 ? (
-          <div className="bg-white border border-surface-200 rounded-3xl p-10 text-center space-y-3 shadow-xs">
-            <CheckCircle2 className="w-10 h-10 text-surface-300 mx-auto" />
-            <p className="text-sm font-bold text-surface-700">No {tab} bookings found</p>
-            <p className="text-xs text-surface-400">Need emergency or scheduled repairs at home?</p>
-            <Link 
-              to="/customer/book" 
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-coop-900 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-coop-800"
-            >
-              <span>Book a Service</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        ) : (
-          list.map(bk => {
-            const pricing = bk.rateCardPricing || calculateRateCardPricing(bk.paymentBreakdown.totalAmount, bk.isEmergency);
-            const activeChangeReq = bk.changeRequests && bk.changeRequests[0];
-            const isRateCardOpen = expandedRateCardId === bk.id;
+      {loading && bookings.length === 0 ? (
+        <div className="flex items-center justify-center py-16 text-surface-400">
+          <Loader2 className="w-6 h-6 animate-spin mr-2" />Loading bookings…
+        </div>
+      ) : displayed.length === 0 ? (
+        <div className="text-center py-16 text-surface-400 text-sm">No bookings found</div>
+      ) : (
+        <div className="space-y-3">
+          {displayed.map((b: any) => {
+            const pmeta = PAYMENT_LABELS[b.paymentStatus] ?? { label: b.paymentStatus, color: 'text-gray-500' };
+            const isOpen = expanded === b._id;
+            const crs: any[] = crMap[b._id] ?? [];
+            const pendingCr = crs.find(c => c.status === 'PENDING_APPROVAL');
 
             return (
-              <div key={bk.id} className="bg-white border border-surface-200 rounded-3xl p-5 sm:p-6 shadow-card space-y-4">
-                
-                {/* Top Row: Worker, Service, Status and Payment Status Badge */}
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex items-center gap-3.5">
-                    <img 
-                      src={bk.assignedWorker?.avatar} 
-                      alt="" 
-                      className="w-12 h-12 rounded-2xl object-cover border border-surface-300 shadow-xs shrink-0" 
-                    />
-                    <div>
-                      <h3 className="font-bold text-surface-900 text-sm sm:text-base">{bk.subServiceName}</h3>
-                      <p className="text-xs text-surface-500">
-                        {bk.assignedWorker?.name} ({bk.assignedWorker?.rating}★) • #{bk.bookingNumber}
-                      </p>
+              <div key={b._id} className={`bg-white border rounded-2xl shadow-xs overflow-hidden transition-all ${
+                pendingCr ? 'border-orange-300' : 'border-surface-200'
+              }`}>
+                {/* Change Request Alert Banner */}
+                {pendingCr && (
+                  <div className="bg-orange-50 border-b border-orange-200 px-4 py-2.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs text-orange-800">
+                      <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0" />
+                      <span><strong>Additional ₹{pendingCr.additionalAmount} requested</strong> — {pendingCr.reason}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => handleCrRespond(pendingCr._id, b._id, 'APPROVED')}
+                        className="px-3 py-1 bg-emerald-600 text-white text-[10px] font-bold rounded-lg hover:bg-emerald-700 transition-colors">
+                        Approve
+                      </button>
+                      <button onClick={() => handleCrRespond(pendingCr._id, b._id, 'REJECTED')}
+                        className="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-lg hover:bg-red-200 transition-colors">
+                        Reject
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {bk.isEmergency && <Siren className="w-4 h-4 text-rose-600 animate-pulse" />}
-                    
-                    {/* Work Status Badge */}
-                    <span className={`px-3 py-1 rounded-full text-[11px] font-extrabold uppercase ${STATUS_COLORS[bk.status] || 'bg-surface-100 text-surface-700'}`}>
-                      {bk.status.replace(/_/g, ' ')}
-                    </span>
-
-                    {/* Dedicated Evaluation Required Payment Status Badge */}
-                    <PaymentStatusBadge status={bk.paymentStatus} size="md" />
-                  </div>
-                </div>
-
-                {/* ⚠️ CHANGE REQUEST ALERT PANEL (Worker Requests Extra Work -> Customer Approves/Rejects) */}
-                {activeChangeReq && (
-                  <ChangeRequestAlert
-                    booking={bk}
-                    changeRequest={activeChangeReq}
-                    onApprove={(bookingId, requestId) => respondToChangeRequest(bookingId, requestId, 'approve')}
-                    onReject={(bookingId, requestId, note) => respondToChangeRequest(bookingId, requestId, 'reject', note)}
-                  />
                 )}
 
-                {/* Service Meta Details Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-surface-50 p-3.5 rounded-2xl border border-surface-100">
-                  <div>
-                    <span className="text-surface-400 block text-[10px] uppercase font-bold">Scheduled</span>
-                    <p className="font-semibold text-surface-800 mt-0.5">{bk.date} • {bk.timeSlot}</p>
-                  </div>
-                  <div>
-                    <span className="text-surface-400 block text-[10px] uppercase font-bold">Address</span>
-                    <p className="font-semibold text-surface-800 mt-0.5 truncate">{bk.address.street}, {bk.address.area}</p>
-                  </div>
-                  <div>
-                    <span className="text-surface-400 block text-[10px] uppercase font-bold">Escrow Total</span>
-                    <p className="font-black text-surface-900 text-sm mt-0.5">₹{bk.paymentBreakdown.totalAmount}</p>
-                  </div>
-                  <div>
-                    <span className="text-surface-400 block text-[10px] uppercase font-bold">Escrow Shield</span>
-                    <p className="text-emerald-700 font-bold mt-0.5 flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5" /> 100% Protected
-                    </p>
-                  </div>
-                </div>
-
-                {/* Clear Pricing / Rate Card Accordion Toggle */}
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => setExpandedRateCardId(isRateCardOpen ? null : bk.id)}
-                    className="flex items-center justify-between w-full p-2.5 bg-surface-50 hover:bg-coop-50/50 rounded-xl border border-surface-200/80 text-xs text-surface-700 font-semibold transition-colors"
-                  >
-                    <span className="flex items-center gap-1.5 text-coop-900 font-bold">
-                      <Tag className="w-3.5 h-3.5 text-coop-700" />
-                      <span>Standard Rate Card Breakdown (Base, Labour, Material, Travel)</span>
-                    </span>
-                    <div className="flex items-center gap-1 text-surface-500">
-                      <span>{isRateCardOpen ? 'Hide Rate Card' : 'View Breakdown'}</span>
-                      {isRateCardOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                <div className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-black text-surface-900 font-mono">{b.bookingNumber}</p>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS_COLORS[b.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                          {b.status?.replace(/_/g,' ')}
+                        </span>
+                      </div>
+                      <p className="text-sm font-bold text-surface-800 mt-1">{b.serviceCategory}</p>
+                      <p className="text-xs text-surface-500">{b.scheduledDate} · {b.scheduledTimeSlot}</p>
                     </div>
-                  </button>
+                    <button onClick={() => handleExpand(b._id)} className="p-1.5 rounded-lg hover:bg-surface-100 transition-colors">
+                      {isOpen ? <ChevronUp className="w-4 h-4 text-surface-500" /> : <ChevronDown className="w-4 h-4 text-surface-500" />}
+                    </button>
+                  </div>
 
-                  {isRateCardOpen && (
-                    <div className="mt-2.5 animate-fade-in">
-                      <RateCardBreakdown pricing={pricing} serviceName={bk.subServiceName} isCompact={true} />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3 h-3 text-surface-400" />
+                      <span className="text-xs text-surface-500">{b.address?.area}, {b.address?.city}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs font-bold ${pmeta.color}`}>{pmeta.label}</span>
+                      <span className="text-sm font-black text-surface-900">₹{b.totalAmount}</span>
+                    </div>
+                  </div>
+
+                  {/* Rate Card Breakdown */}
+                  {isOpen && (
+                    <div className="mt-4 pt-4 border-t border-surface-100 space-y-4">
+                      {/* Pricing */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-surface-50 rounded-xl p-3 space-y-1">
+                          <p className="font-bold text-surface-700 mb-2">Rate Card</p>
+                          {[
+                            ['Base Charge', b.baseServiceCharge],
+                            ['Labour', b.labourCharge],
+                            ['Material', b.materialCharge],
+                            ['Travel', b.travelCharge],
+                          ].map(([l, v]) => (
+                            <div key={l as string} className="flex justify-between text-surface-600">
+                              <span>{l}</span><span className="font-semibold">₹{v}</span>
+                            </div>
+                          ))}
+                          <div className="flex justify-between font-black text-surface-900 pt-1 border-t border-surface-200">
+                            <span>Total</span><span>₹{b.totalAmount}</span>
+                          </div>
+                        </div>
+                        <div className="bg-emerald-50 rounded-xl p-3 space-y-1">
+                          <p className="font-bold text-emerald-800 mb-2">Payment Split (80/10/5/5)</p>
+                          {[
+                            ['Worker (80%)', b.workerEarnings, 'text-emerald-700'],
+                            ['Welfare (10%)', b.welfareContribution, 'text-blue-600'],
+                            ['Coop Fund (5%)', b.cooperativeFund, 'text-purple-600'],
+                            ['Platform (5%)', b.platformOperations, 'text-amber-600'],
+                          ].map(([l, v, c]) => (
+                            <div key={l as string} className={`flex justify-between ${c}`}>
+                              <span className="text-surface-600">{l}</span><span className="font-bold">₹{v}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Change Request history */}
+                      {crLoading === b._id ? (
+                        <div className="flex items-center gap-2 text-xs text-surface-400"><Loader2 className="w-3.5 h-3.5 animate-spin" />Loading requests…</div>
+                      ) : crs.length > 0 ? (
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold text-surface-700">Change Requests</p>
+                          {crs.map((cr: any) => (
+                            <div key={cr._id} className={`text-xs p-3 rounded-xl border ${
+                              cr.status === 'APPROVED' ? 'bg-emerald-50 border-emerald-200' :
+                              cr.status === 'REJECTED' ? 'bg-red-50 border-red-200' :
+                              'bg-orange-50 border-orange-200'
+                            }`}>
+                              <div className="flex justify-between font-bold mb-1">
+                                <span>+₹{cr.additionalAmount} requested</span>
+                                <span className={cr.status === 'APPROVED' ? 'text-emerald-700' : cr.status === 'REJECTED' ? 'text-red-700' : 'text-orange-700'}>
+                                  {cr.status}
+                                </span>
+                              </div>
+                              <p className="text-surface-600">{cr.reason}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+
+                      {/* Review section */}
+                      {b.status === 'COMPLETED' && !reviewSuccess && (
+                        <div>
+                          {reviewBooking === b._id ? (
+                            <div className="bg-surface-50 rounded-xl p-4 space-y-3">
+                              <p className="text-xs font-bold text-surface-800">Rate this service</p>
+                              <div className="flex gap-1">
+                                {[1,2,3,4,5].map(n => (
+                                  <button key={n} onClick={() => setReviewForm(f => ({...f, rating: n}))}
+                                    className={`text-xl transition-transform hover:scale-110 ${n <= reviewForm.rating ? 'text-amber-400' : 'text-surface-300'}`}>★</button>
+                                ))}
+                              </div>
+                              <textarea value={reviewForm.comment} onChange={e => setReviewForm(f => ({...f, comment: e.target.value}))}
+                                placeholder="Share your experience…" rows={2}
+                                className="w-full text-xs border border-surface-200 rounded-xl p-3 focus:outline-none focus:border-coop-600 resize-none" />
+                              <div className="flex gap-2">
+                                <button onClick={() => handleSubmitReview(b._id)} disabled={reviewLoading}
+                                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-coop-900 text-white text-xs font-bold rounded-xl hover:bg-coop-800 disabled:opacity-60 transition-colors">
+                                  {reviewLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                                  Submit Review
+                                </button>
+                                <button onClick={() => setReviewBooking(null)} className="px-3 py-2 bg-surface-200 rounded-xl hover:bg-surface-300 transition-colors">
+                                  <X className="w-3.5 h-3.5 text-surface-600" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button onClick={() => setReviewBooking(b._id)}
+                              className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-amber-300 hover:border-amber-400 text-amber-700 text-xs font-bold rounded-xl transition-colors hover:bg-amber-50">
+                              <Star className="w-3.5 h-3.5" />Rate this service
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {reviewSuccess === b._id && (
+                        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-700">
+                          <CheckCircle2 className="w-4 h-4" /><span>Review submitted! Thank you.</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-
-                {/* Action Buttons Row */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-surface-100 text-xs">
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={`tel:${bk.assignedWorker?.phone}`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-100 hover:bg-surface-200 text-surface-700 font-semibold rounded-xl transition-colors"
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                      <span>Call Worker</span>
-                    </a>
-
-                    <button
-                      type="button"
-                      onClick={() => setInspectedInvoice(bk)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-100 hover:bg-surface-200 text-coop-900 font-bold rounded-xl transition-colors"
-                    >
-                      <FileText className="w-3.5 h-3.5" />
-                      <span>Tax Invoice</span>
-                    </button>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Cancellation & Refund Trigger */}
-                    {bk.status !== 'completed' && bk.status !== 'cancelled' && (
-                      <button
-                        type="button"
-                        onClick={() => initiateRefund(bk.id, 'Customer requested cancellation')}
-                        className="px-3 py-1.5 border border-surface-200 hover:bg-rose-50 hover:border-rose-200 text-surface-600 hover:text-rose-700 font-semibold rounded-xl transition-colors flex items-center gap-1"
-                      >
-                        <RotateCcw className="w-3 h-3" />
-                        <span>Cancel & Refund</span>
-                      </button>
-                    )}
-
-                    {/* Complete & Release Escrow Payment */}
-                    {bk.status !== 'completed' && bk.status !== 'cancelled' && (
-                      <button
-                        type="button"
-                        onClick={() => releasePayment(bk.id)}
-                        className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Confirm & Release Payment (₹{bk.paymentBreakdown.totalAmount})</span>
-                      </button>
-                    )}
-
-                    {bk.status === 'completed' && !bk.customerRating && (
-                      <button
-                        type="button"
-                        onClick={() => setReviewBooking(bk)}
-                        className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1"
-                      >
-                        <Star className="w-3.5 h-3.5 fill-white" />
-                        <span>Rate Specialist</span>
-                      </button>
-                    )}
-
-                    {bk.customerRating && (
-                      <div className="flex items-center gap-1 text-amber-600 font-bold">
-                        <Star className="w-4 h-4 fill-amber-500" />
-                        <span>{bk.customerRating}.0 Rating Given</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
             );
-          })
-        )}
-      </div>
-
-      {/* Rating Modal */}
-      {reviewBooking && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-surface-200 space-y-4 animate-scale-up">
-            <div>
-              <h3 className="text-base font-black text-surface-900 font-display">
-                Rate {reviewBooking.assignedWorker?.name}
-              </h3>
-              <p className="text-xs text-surface-500">
-                Booking #{reviewBooking.bookingNumber} • {reviewBooking.subServiceName}
-              </p>
-            </div>
-
-            <form onSubmit={handleReviewSubmit} className="space-y-4 text-xs">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-surface-700">Stars:</span>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map(st => (
-                    <button
-                      key={st}
-                      type="button"
-                      onClick={() => setReviewRating(st)}
-                      className="p-1 hover:scale-110"
-                    >
-                      <Star className={`w-6 h-6 ${st <= reviewRating ? 'text-amber-500 fill-amber-500' : 'text-surface-200'}`} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="font-bold text-surface-700 block mb-1">Feedback Comment</label>
-                <textarea
-                  rows={3}
-                  value={reviewComment}
-                  onChange={e => setReviewComment(e.target.value)}
-                  placeholder="How was the punctuality, cleanliness, and service quality?"
-                  className="w-full bg-surface-50 border border-surface-200 rounded-xl p-3 text-surface-900 focus:outline-none focus:border-coop-600 font-medium"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setReviewBooking(null)}
-                  className="px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-xs"
-                >
-                  Submit Verified Rating
-                </button>
-              </div>
-            </form>
-          </div>
+          })}
         </div>
       )}
-
-      {/* Tax Invoice Modal with Clear Rate Card Breakdown */}
-      {inspectedInvoice && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-surface-200 space-y-5 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-start justify-between border-b border-surface-200 pb-3">
-              <div>
-                <span className="text-base font-black text-coop-950 font-display">COOPERATIVE SERVICE TAX INVOICE</span>
-                <p className="text-[11px] text-surface-500">Maharashtra Labour Cooperative Societies Federation</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setInspectedInvoice(null)}
-                className="p-1 rounded-lg text-surface-500 hover:bg-surface-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-4 bg-surface-50 rounded-2xl border border-surface-200 text-xs space-y-2">
-              <div className="flex justify-between">
-                <span className="text-surface-500">Booking Number:</span>
-                <span className="font-mono font-bold text-surface-900">#{inspectedInvoice.bookingNumber}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-surface-500">Service:</span>
-                <span className="font-bold text-surface-900">{inspectedInvoice.subServiceName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-surface-500">Worker Assigned:</span>
-                <span className="font-semibold text-surface-900">{inspectedInvoice.assignedWorker?.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-surface-500">Payment Status:</span>
-                <PaymentStatusBadge status={inspectedInvoice.paymentStatus} size="sm" />
-              </div>
-            </div>
-
-            {/* Rate Card Itemization */}
-            {inspectedInvoice.rateCardPricing && (
-              <div className="border border-surface-200 rounded-2xl p-4 text-xs space-y-2">
-                <span className="text-[10px] font-bold text-surface-400 uppercase block mb-1">Rate Card Breakdown</span>
-                <div className="flex justify-between text-surface-700">
-                  <span>Base Service & Inspection Charge:</span>
-                  <span className="font-mono font-semibold">₹{inspectedInvoice.rateCardPricing.baseServiceCharge}</span>
-                </div>
-                <div className="flex justify-between text-surface-700">
-                  <span>Certified Labour Fee:</span>
-                  <span className="font-mono font-semibold">₹{inspectedInvoice.rateCardPricing.labourCharge}</span>
-                </div>
-                <div className="flex justify-between text-surface-700">
-                  <span>Material / Spare Parts:</span>
-                  <span className="font-mono font-semibold">₹{inspectedInvoice.rateCardPricing.materialCharge}</span>
-                </div>
-                <div className="flex justify-between text-surface-700">
-                  <span>Travel / Cluster Dispatch:</span>
-                  <span className="font-mono font-semibold">
-                    {inspectedInvoice.rateCardPricing.travelCharge === 0 ? 'FREE' : `₹${inspectedInvoice.rateCardPricing.travelCharge}`}
-                  </span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-surface-200 text-sm font-black text-surface-900">
-                  <span>Total Escrow Amount:</span>
-                  <span className="text-emerald-800">₹{inspectedInvoice.paymentBreakdown.totalAmount}</span>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setInspectedInvoice(null)}
-                className="px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-xs font-semibold"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="px-5 py-2 bg-coop-900 hover:bg-coop-800 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print Invoice</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };

@@ -1,347 +1,210 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useApp } from '../../context/AppContext';
-import { 
-  ArrowRight, 
-  CheckCircle2, 
-  Phone, 
-  Navigation, 
-  Star, 
-  ShieldCheck, 
-  Award, 
-  Wallet, 
-  Clock, 
-  Briefcase, 
-  Siren, 
-  QrCode,
-  AlertCircle,
-  AlertTriangle,
-  PlusCircle
+import { useAuth } from '../../context/AuthContext';
+import {
+  Siren, Star, Briefcase, Clock, Wallet,
+  ShieldCheck, ArrowRight, CheckCircle2, AlertCircle,
+  Loader2, WifiOff, Zap, MapPin, Phone, RefreshCw
 } from 'lucide-react';
-import { Modal } from '../../components/common/Modal';
-import { SkillPassportCard } from '../../components/worker/SkillPassportCard';
-import { PaymentStatusBadge } from '../../components/common/PaymentStatusBadge';
-import { WorkerChangeRequestModal } from '../../components/worker/WorkerChangeRequestModal';
+import { sosApi } from '../../utils/apiClient';
+
+const STATUS_COLORS: Record<string, string> = {
+  PENDING_MATCH: 'bg-amber-100 text-amber-700',
+  ALLOCATED: 'bg-blue-100 text-blue-700',
+  ACCEPTED_BY_WORKER: 'bg-indigo-100 text-indigo-700',
+  EN_ROUTE: 'bg-cyan-100 text-cyan-700',
+  ARRIVED: 'bg-violet-100 text-violet-700',
+  IN_PROGRESS: 'bg-purple-100 text-purple-700',
+  COMPLETED: 'bg-emerald-100 text-emerald-700',
+  CANCELLED: 'bg-red-100 text-red-600',
+};
+
+const JOB_STATUS_TRANSITIONS: Record<string, string | null> = {
+  ALLOCATED: 'ACCEPTED_BY_WORKER',
+  ACCEPTED_BY_WORKER: 'EN_ROUTE',
+  EN_ROUTE: 'ARRIVED',
+  ARRIVED: 'IN_PROGRESS',
+  IN_PROGRESS: 'COMPLETED',
+};
 
 export const WorkerDashboard: React.FC = () => {
-  const { activeWorker, bookings, updateBookingStatus, requestAdditionalWork } = useApp();
-  const [isAvailable, setIsAvailable] = useState(activeWorker.isAvailable);
-  const [isPassportModalOpen, setIsPassportModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'pending' | 'active' | 'completed'>('active');
-  const [changeRequestJob, setChangeRequestJob] = useState<any | null>(null);
+  const { workerProfile, bookings, fetchWorkerProfile, setAvailability, updateBookingStatus, fetchBookings } = useAuth();
+  const [isAvail, setIsAvail] = useState(false);
+  const [availLoading, setAvailLoading] = useState(false);
+  const [sosLoading, setSosLoading] = useState(false);
+  const [sosSent, setSosSent] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
 
-  const activeJobs = bookings.filter(b => b.status !== 'completed' && b.status !== 'cancelled');
-  const completedJobs = bookings.filter(b => b.status === 'completed');
-  
-  // Real demo metrics as required: Today's jobs: 4, Month earnings: ₹28,450, Rating: 4.8★, Completed: 126
-  const todaysJobsCount = 4;
-  const thisMonthEarnings = 28450;
-  const jobsCompletedCount = 126;
-  const ratingScore = 4.8;
+  useEffect(() => {
+    fetchWorkerProfile();
+    fetchBookings();
+  }, []);
+
+  useEffect(() => {
+    if (workerProfile) setIsAvail(workerProfile.isAvailable);
+  }, [workerProfile]);
+
+  const toggleAvail = async () => {
+    setAvailLoading(true);
+    const newVal = !isAvail;
+    await setAvailability(newVal);
+    setIsAvail(newVal);
+    setAvailLoading(false);
+  };
+
+  const handleSos = async () => {
+    setSosLoading(true);
+    await sosApi.trigger(18.5204, 73.8567); // Current location — ideally from geolocation API
+    setSosSent(true);
+    setSosLoading(false);
+    setTimeout(() => setSosSent(false), 5000);
+  };
+
+  const handleStatusUpdate = async (bookingId: string, newStatus: string) => {
+    setStatusUpdating(bookingId);
+    await updateBookingStatus(bookingId, newStatus);
+    setStatusUpdating(null);
+  };
+
+  const activeJobs = bookings.filter(b => !['COMPLETED','CANCELLED'].includes(b.status));
+  const completedJobs = bookings.filter(b => b.status === 'COMPLETED');
+  const monthEarnings = completedJobs.reduce((sum: number, b: any) => sum + (b.workerEarnings ?? 0), 0);
+
+  const wp = workerProfile;
+  const userName = wp?.userId?.name ?? 'Worker';
 
   return (
-    <div className="space-y-6">
-      
-      {/* Top Welcome & Availability Card */}
-      <div className="bg-white border border-surface-200 rounded-3xl p-5 sm:p-6 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-5">
+    <div className="space-y-5">
+      {/* Profile Card */}
+      <div className="bg-white border border-surface-200 rounded-3xl p-5 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
-          <img 
-            src={activeWorker.avatar} 
-            alt={activeWorker.name} 
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border-2 border-emerald-500 shadow-sm shrink-0" 
-          />
+          <div className="w-14 h-14 rounded-2xl bg-coop-900 flex items-center justify-center text-white text-2xl font-black shrink-0">
+            {userName.charAt(0)}
+          </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-black text-surface-900 font-display">
-                Namaste, {activeWorker.name}
-              </h1>
-              <span className="p-0.5 bg-emerald-100 text-emerald-800 rounded-full" title="KYC & Skill Verified">
-                <ShieldCheck className="w-4 h-4" />
-              </span>
+              <h1 className="text-lg font-black text-surface-900 font-display">Namaste, {userName}</h1>
+              {wp?.kycVerified && <span title="KYC Verified"><ShieldCheck className="w-4 h-4 text-emerald-500" /></span>}
             </div>
-            <p className="text-xs text-surface-500">{activeWorker.cooperativeSociety}</p>
-            <p className="text-[11px] text-surface-400 font-mono mt-0.5">Worker ID: {activeWorker.membershipId}</p>
+            <p className="text-xs text-surface-500">{wp?.primarySkillCategory} · {wp?.membershipNumber}</p>
+            <div className="flex items-center gap-1 mt-1">
+              <Star className="w-3.5 h-3.5 fill-amber-400 stroke-amber-400" />
+              <span className="text-xs font-bold text-surface-700">{wp?.ratingAverage?.toFixed(1) ?? '—'}</span>
+              <span className="text-xs text-surface-400">({wp?.totalReviewsCount ?? 0} reviews)</span>
+            </div>
           </div>
         </div>
 
-        {/* Availability Toggle & Passport Button */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap gap-3 items-center">
           {/* Availability Toggle */}
-          <button
-            type="button"
-            onClick={() => setIsAvailable(!isAvailable)}
-            className={`px-3.5 py-2 rounded-2xl border text-xs font-bold flex items-center gap-2 transition-all shadow-xs ${
-              isAvailable 
-                ? 'bg-emerald-50 border-emerald-300 text-emerald-900' 
-                : 'bg-surface-100 border-surface-300 text-surface-600'
-            }`}
-          >
-            <span className={`w-2.5 h-2.5 rounded-full ${isAvailable ? 'bg-emerald-500 animate-pulse' : 'bg-surface-400'}`} />
-            <span>{isAvailable ? 'Online & Ready for Jobs' : 'Offline (On Break)'}</span>
-          </button>
-
-          {/* Skill Passport Trigger */}
-          <button
-            type="button"
-            onClick={() => setIsPassportModalOpen(true)}
-            className="px-4 py-2 bg-coop-900 hover:bg-coop-800 text-white text-xs font-bold rounded-2xl shadow-xs flex items-center gap-1.5 transition-all"
-          >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>My Skill Passport</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 5 Core Evaluation KPI Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        <div className="bg-white border border-surface-200 rounded-2xl p-4 shadow-xs">
-          <div className="w-8 h-8 rounded-xl bg-coop-50 text-coop-700 flex items-center justify-center mb-2">
-            <Briefcase className="w-4 h-4" />
-          </div>
-          <span className="text-xl sm:text-2xl font-black text-surface-900 font-display block">{todaysJobsCount}</span>
-          <span className="text-[11px] text-surface-500 font-medium">Today's Jobs</span>
-        </div>
-
-        <div className="bg-white border border-surface-200 rounded-2xl p-4 shadow-xs">
-          <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-2">
-            <Wallet className="w-4 h-4" />
-          </div>
-          <span className="text-xl sm:text-2xl font-black text-emerald-900 font-display block">₹{thisMonthEarnings.toLocaleString()}</span>
-          <span className="text-[11px] text-surface-500 font-medium">This Month Earnings</span>
-        </div>
-
-        <div className="bg-white border border-surface-200 rounded-2xl p-4 shadow-xs">
-          <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center mb-2">
-            <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-          </div>
-          <span className="text-xl sm:text-2xl font-black text-amber-900 font-display block">{ratingScore} / 5</span>
-          <span className="text-[11px] text-surface-500 font-medium">Customer Rating</span>
-        </div>
-
-        <div className="bg-white border border-surface-200 rounded-2xl p-4 shadow-xs">
-          <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center mb-2">
-            <CheckCircle2 className="w-4 h-4" />
-          </div>
-          <span className="text-xl sm:text-2xl font-black text-surface-900 font-display block">{jobsCompletedCount}</span>
-          <span className="text-[11px] text-surface-500 font-medium">Jobs Completed</span>
-        </div>
-
-        <div className="bg-white border border-surface-200 rounded-2xl p-4 shadow-xs col-span-2 sm:col-span-1">
-          <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-2">
-            <ShieldCheck className="w-4 h-4" />
-          </div>
-          <span className="text-xl sm:text-2xl font-black text-emerald-800 font-display block">100% Verified</span>
-          <span className="text-[11px] text-surface-500 font-medium">Profile Verified</span>
-        </div>
-      </div>
-
-      {/* Active Service Dispatch Card */}
-      {activeJobs.length > 0 ? (
-        <div className="bg-white border-2 border-emerald-500 rounded-3xl p-5 sm:p-6 shadow-elevated space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-surface-100">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-              <h2 className="text-sm font-bold text-surface-900">Current Assigned Service Order</h2>
-              <span className="text-xs font-mono font-bold bg-surface-100 px-2 py-0.5 rounded text-surface-700">
-                #{activeJobs[0].bookingNumber}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-emerald-100 text-emerald-900">
-                {activeJobs[0].status.replace(/_/g, ' ')}
-              </span>
-              <PaymentStatusBadge status={activeJobs[0].paymentStatus} size="sm" />
-            </div>
-          </div>
-
-          {/* Change Request Banner for Worker */}
-          {activeJobs[0].changeRequests && activeJobs[0].changeRequests[0] && (
-            <div className={`p-3 rounded-2xl border text-xs ${
-              activeJobs[0].changeRequests[0].status === 'pending'
-                ? 'bg-purple-50 border-purple-200 text-purple-900'
-                : activeJobs[0].changeRequests[0].status === 'approved'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                : 'bg-rose-50 border-rose-200 text-rose-900'
+          <button onClick={toggleAvail} disabled={availLoading}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
+              isAvail ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-surface-100 text-surface-700 hover:bg-surface-200'
             }`}>
-              <div className="flex items-center justify-between font-bold">
-                <span className="flex items-center gap-1.5">
-                  {activeJobs[0].changeRequests[0].status === 'pending' && (
-                    <>
-                      <AlertTriangle className="w-4 h-4 text-purple-600" />
-                      <span>Additional Work Request Pending (+₹{activeJobs[0].changeRequests[0].totalExtraAmount})</span>
-                    </>
-                  )}
-                  {activeJobs[0].changeRequests[0].status === 'approved' && (
-                    <>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span>Customer Approved (+₹{activeJobs[0].changeRequests[0].totalExtraAmount})</span>
-                    </>
-                  )}
-                  {activeJobs[0].changeRequests[0].status === 'rejected' && (
-                    <>
-                      <AlertCircle className="w-4 h-4 text-rose-600" />
-                      <span>Customer Declined Additional Scope</span>
-                    </>
-                  )}
-                </span>
-                <span className="text-[10px] uppercase font-mono">{activeJobs[0].changeRequests[0].status}</span>
-              </div>
-              <p className="text-[11px] opacity-85 mt-1">"{activeJobs[0].changeRequests[0].reason}"</p>
-            </div>
-          )}
+            {availLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (isAvail ? <Zap className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />)}
+            <span>{isAvail ? 'Available' : 'Go Online'}</span>
+          </button>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div>
-              <span className="text-surface-400 block mb-0.5">Service & Customer</span>
-              <p className="font-bold text-surface-900 text-sm">{activeJobs[0].subServiceName}</p>
-              <p className="text-surface-600 font-medium">{activeJobs[0].customerName} • {activeJobs[0].customerPhone}</p>
-            </div>
-            <div>
-              <span className="text-surface-400 block mb-0.5">Location & Slot</span>
-              <p className="font-semibold text-surface-800">{activeJobs[0].address.street}</p>
-              <p className="text-surface-500">{activeJobs[0].address.area} • {activeJobs[0].timeSlot}</p>
-            </div>
-            <div>
-              <span className="text-surface-400 block mb-0.5">Your Net Earning</span>
-              <p className="text-xl font-black text-emerald-800 font-display">
-                ₹{activeJobs[0].paymentBreakdown.workerEarnings}
-              </p>
-              <p className="text-[11px] text-surface-400">+ ₹{activeJobs[0].paymentBreakdown.welfareInsurance} health fund</p>
-            </div>
-          </div>
-
-          <div className="p-3.5 bg-surface-50 rounded-2xl border border-surface-200 text-xs text-surface-700">
-            <span className="font-bold text-surface-900">Reported Problem: </span>
-            "{activeJobs[0].problemDescription}"
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-surface-100">
-            <div className="flex items-center gap-2">
-              <a
-                href={`tel:${activeJobs[0].customerPhone}`}
-                className="px-3.5 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
-              >
-                <Phone className="w-3.5 h-3.5" />
-                <span>Call Customer</span>
-              </a>
-              <button
-                type="button"
-                onClick={() => setChangeRequestJob(activeJobs[0])}
-                className="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
-                title="Submit reason + labour/material breakdown. No unilateral price increase."
-              >
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span>Request Additional Work</span>
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {activeJobs[0].status === 'allocated' && (
-                <button
-                  type="button"
-                  onClick={() => updateBookingStatus(activeJobs[0].id, 'accepted_by_worker')}
-                  className="px-4 py-2 bg-coop-900 hover:bg-coop-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all"
-                >
-                  Accept Job
-                </button>
-              )}
-              {activeJobs[0].status === 'accepted_by_worker' && (
-                <button
-                  type="button"
-                  onClick={() => updateBookingStatus(activeJobs[0].id, 'en_route')}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all"
-                >
-                  Start Trip (En Route)
-                </button>
-              )}
-              {activeJobs[0].status === 'en_route' && (
-                <button
-                  type="button"
-                  onClick={() => updateBookingStatus(activeJobs[0].id, 'arrived')}
-                  className="px-4 py-2 bg-coop-800 hover:bg-coop-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all"
-                >
-                  Mark Arrived
-                </button>
-              )}
-              {activeJobs[0].status === 'arrived' && (
-                <button
-                  type="button"
-                  onClick={() => updateBookingStatus(activeJobs[0].id, 'in_progress')}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all"
-                >
-                  Start Working
-                </button>
-              )}
-              {activeJobs[0].status === 'in_progress' && (
-                <button
-                  type="button"
-                  onClick={() => updateBookingStatus(activeJobs[0].id, 'completed')}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Job Completed & Release ₹{activeJobs[0].paymentBreakdown.workerEarnings}</span>
-                </button>
-              )}
-            </div>
-          </div>
+          {/* SOS Button */}
+          <button onClick={handleSos} disabled={sosLoading || sosSent}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
+              sosSent ? 'bg-emerald-600 text-white' : 'bg-red-600 hover:bg-red-700 text-white animate-pulse'
+            }`}>
+            {sosLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Siren className="w-3.5 h-3.5" />}
+            <span>{sosSent ? 'SOS Sent!' : 'SOS'}</span>
+          </button>
         </div>
-      ) : (
-        <div className="bg-white border border-surface-200 rounded-3xl p-8 text-center space-y-3">
-          <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
-          <h3 className="font-bold text-surface-900 text-base">No Pending Assigned Jobs</h3>
-          <p className="text-xs text-surface-500 max-w-sm mx-auto">
-            You have successfully cleared your active job queue. Keep your availability toggle ON to receive nearby requests.
-          </p>
-        </div>
-      )}
-
-      {/* Welfare & Social Security Quick Status Banner */}
-      <div className="p-5 bg-gradient-to-r from-emerald-50 to-coop-50/60 rounded-3xl border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
-            Maharashtra Labour Welfare Board • Member Benefit
-          </span>
-          <h3 className="text-sm font-bold text-surface-900 mt-0.5">
-            ₹5 Lakh Health Cover & Pension Fund Active
-          </h3>
-          <p className="text-xs text-surface-600 mt-0.5">
-            Next renewal covered by cooperative reserve. Training credits: <strong>{activeWorker.welfare.trainingCredits} credits accumulated</strong>.
-          </p>
-        </div>
-        <Link
-          to="/worker/welfare"
-          className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors shrink-0"
-        >
-          View Welfare Vault →
-        </Link>
       </div>
 
-      {/* Skill Passport Modal */}
-      {isPassportModalOpen && (
-        <Modal
-          isOpen={isPassportModalOpen}
-          onClose={() => setIsPassportModalOpen(false)}
-          title="Digital Skill Passport"
-          maxWidth="lg"
-        >
-          <SkillPassportCard worker={activeWorker} />
-        </Modal>
-      )}
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Today's Jobs", value: wp?.todayJobCount ?? 0, icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Month Earnings', value: `₹${monthEarnings.toLocaleString()}`, icon: Wallet, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Completed Jobs', value: wp?.completedJobsCount ?? completedJobs.length, icon: CheckCircle2, color: 'text-coop-700', bg: 'bg-coop-50' },
+          { label: 'Reliability', value: `${wp?.reliabilityScore ?? 100}%`, icon: ShieldCheck, color: 'text-amber-600', bg: 'bg-amber-50' },
+        ].map(stat => {
+          const Icon = stat.icon;
+          return (
+            <div key={stat.label} className="bg-white border border-surface-200 rounded-2xl p-4 shadow-xs">
+              <div className={`w-8 h-8 ${stat.bg} rounded-xl flex items-center justify-center mb-2`}>
+                <Icon className={`w-4 h-4 ${stat.color}`} />
+              </div>
+              <p className="text-lg font-black text-surface-900">{stat.value}</p>
+              <p className="text-[10px] text-surface-400 mt-0.5">{stat.label}</p>
+            </div>
+          );
+        })}
+      </div>
 
-      {/* Change Request / Additional Work Modal */}
-      {changeRequestJob && (
-        <WorkerChangeRequestModal
-          booking={changeRequestJob}
-          isOpen={!!changeRequestJob}
-          onClose={() => setChangeRequestJob(null)}
-          onSubmit={(data) => {
-            requestAdditionalWork(changeRequestJob.id, data);
-            setChangeRequestJob(null);
-          }}
-        />
-      )}
+      {/* Jobs Tabs */}
+      <div className="bg-white border border-surface-200 rounded-3xl shadow-card overflow-hidden">
+        <div className="flex border-b border-surface-100">
+          {(['active', 'completed'] as const).map(t => (
+            <button key={t} onClick={() => setActiveTab(t)}
+              className={`flex-1 py-3 text-xs font-bold capitalize transition-colors ${
+                activeTab === t ? 'border-b-2 border-coop-700 text-coop-900' : 'text-surface-400 hover:text-surface-700'
+              }`}>
+              {t} ({t === 'active' ? activeJobs.length : completedJobs.length})
+            </button>
+          ))}
+        </div>
 
+        <div className="p-4 space-y-3">
+          {(activeTab === 'active' ? activeJobs : completedJobs).length === 0 ? (
+            <div className="py-10 text-center text-surface-400 text-xs">
+              {activeTab === 'active' ? 'No active jobs right now' : 'No completed jobs yet'}
+            </div>
+          ) : (activeTab === 'active' ? activeJobs : completedJobs).map((b: any) => {
+            const nextStatus = JOB_STATUS_TRANSITIONS[b.status];
+            return (
+              <div key={b._id} className="border border-surface-100 rounded-2xl p-4 hover:border-surface-200 transition-colors">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="text-xs font-black text-surface-900">{b.bookingNumber}</p>
+                    <p className="text-xs font-semibold text-surface-700 mt-0.5">{b.serviceCategory}</p>
+                    <p className="text-[10px] text-surface-500">{b.scheduledDate} · {b.scheduledTimeSlot}</p>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS_COLORS[b.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                    {b.status?.replace(/_/g,' ')}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 text-[10px] text-surface-500 mb-3">
+                  <MapPin className="w-3 h-3" />
+                  <span>{b.address?.area}, {b.address?.city}</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-emerald-700">Your share: ₹{b.workerEarnings}</span>
+                    <span className="text-[10px] text-surface-400">(80% of ₹{b.totalAmount})</span>
+                  </div>
+                  {nextStatus && (
+                    <button
+                      onClick={() => handleStatusUpdate(b._id, nextStatus)}
+                      disabled={statusUpdating === b._id}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-coop-900 hover:bg-coop-800 text-white text-[10px] font-bold rounded-lg transition-colors disabled:opacity-60">
+                      {statusUpdating === b._id ? <Loader2 className="w-3 h-3 animate-spin" /> : <ArrowRight className="w-3 h-3" />}
+                      {nextStatus.replace(/_/g,' ')}
+                    </button>
+                  )}
+                </div>
+
+                {/* Change Request CTA for IN_PROGRESS */}
+                {b.status === 'IN_PROGRESS' && (
+                  <div className="mt-3 pt-3 border-t border-surface-100">
+                    <Link to="/worker/jobs" className="text-[10px] text-amber-700 font-bold hover:underline flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> Request additional material/labour cost
+                    </Link>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };

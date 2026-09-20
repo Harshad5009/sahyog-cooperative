@@ -20,6 +20,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { MOCK_WORKERS } from '../../data/mockWorkers';
+import { sosApi } from '../../utils/apiClient';
 import confetti from 'canvas-confetti';
 
 const EMERGENCY_SERVICES = [
@@ -142,6 +143,10 @@ export const EmergencyPage: React.FC = () => {
 
     setDispatchedBookingId(newBk.bookingNumber);
     setIsDispatched(true);
+
+    // Sync to backend SOS emergency telemetry
+    sosApi.trigger(18.5204, 73.8567, newBk.bookingNumber).catch(() => {});
+
     try {
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     } catch (e) {}

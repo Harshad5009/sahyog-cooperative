@@ -1,148 +1,99 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Clock, Star, ShieldCheck, Wrench, ClipboardList, CreditCard, User, Sparkles, AlertTriangle } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
-import { PaymentStatusBadge } from '../../components/common/PaymentStatusBadge';
+import { useAuth } from '../../context/AuthContext';
+import {
+  Plus, Briefcase, Clock, CheckCircle2, ArrowRight,
+  Star, MapPin, Loader2, RefreshCw, Siren, ShieldCheck
+} from 'lucide-react';
 
 export const CustomerDashboard: React.FC = () => {
-  const { bookings } = useApp();
-  const activeBookings = bookings.filter(b => b.status !== 'completed' && b.status !== 'cancelled');
-  const completedBookings = bookings.filter(b => b.status === 'completed');
+  const { bookings, fetchBookings, authUser } = useAuth();
+  const [loading, setLoading] = useState(false);
+
+  const load = async () => { setLoading(true); await fetchBookings(); setLoading(false); };
+  useEffect(() => { load(); }, []);
+
+  const active = bookings.filter(b => !['COMPLETED','CANCELLED'].includes(b.status));
+  const completed = bookings.filter(b => b.status === 'COMPLETED');
+  const pending = bookings.filter(b => b.paymentStatus === 'PAYMENT_PENDING');
 
   return (
     <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-black text-gray-900 font-display">
-              Good morning, Priya
+      {/* Welcome */}
+      <div className="bg-gradient-to-br from-coop-900 via-coop-800 to-emerald-900 rounded-3xl p-6 text-white shadow-xl">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs text-emerald-300 font-bold uppercase tracking-wider mb-1">SAHYOG Customer Portal</p>
+            <h1 className="text-xl font-black font-display">
+              Namaste, {authUser?.name ?? 'Customer'} 👋
             </h1>
-            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-bold">
-              Verified Member
-            </span>
+            <p className="text-sm text-emerald-200/80 mt-1">Your trusted cooperative service network is ready.</p>
           </div>
-          <p className="text-sm text-gray-500 mt-0.5">Your cooperative service hub — Kothrud, Pune</p>
+          <div className="p-3 bg-white/10 rounded-2xl">
+            <ShieldCheck className="w-6 h-6 text-emerald-300" />
+          </div>
         </div>
-        <Link
-          to="/customer/book"
-          className="flex items-center gap-2 px-4 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-xl transition-colors shadow-xs"
-        >
-          Book a Service <ArrowRight className="w-4 h-4" />
-        </Link>
+        <div className="grid grid-cols-3 gap-3 mt-5">
+          {[
+            { label: 'Active', value: active.length, color: 'bg-white/10' },
+            { label: 'Completed', value: completed.length, color: 'bg-white/10' },
+            { label: 'Pending Pay', value: pending.length, color: pending.length > 0 ? 'bg-amber-500/30' : 'bg-white/10' },
+          ].map(s => (
+            <div key={s.label} className={`${s.color} rounded-2xl p-3 text-center`}>
+              <p className="text-xl font-black">{loading ? '…' : s.value}</p>
+              <p className="text-[10px] text-white/70 font-medium">{s.label}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Bookings', value: bookings.length, icon: BookOpen, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Active Services', value: activeBookings.length, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Completed', value: completedBookings.length, icon: ShieldCheck, color: 'text-teal-600', bg: 'bg-teal-50' },
-          { label: 'Avg Rating Given', value: '4.8 / 5', icon: Star, color: 'text-purple-600', bg: 'bg-purple-50' },
-        ].map(s => (
-          <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-4">
-            <div className={`w-9 h-9 ${s.bg} rounded-xl flex items-center justify-center mb-3`}>
-              <s.icon className={`w-4 h-4 ${s.color}`} />
-            </div>
-            <p className="text-xl font-black text-gray-900 font-display">{s.value}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
-          </div>
-        ))}
+          { label: 'Book Service', icon: Plus, to: '/customer/book', color: 'bg-coop-900 text-white', text: 'text-white' },
+          { label: 'My Bookings', icon: Briefcase, to: '/customer/bookings', color: 'bg-white border border-surface-200', text: 'text-coop-800' },
+          { label: 'Payments', icon: Clock, to: '/customer/payments', color: 'bg-white border border-surface-200', text: 'text-coop-800' },
+          { label: 'Emergency', icon: Siren, to: '/emergency', color: 'bg-red-600 text-white', text: 'text-white' },
+        ].map(a => {
+          const Icon = a.icon;
+          return (
+            <Link key={a.label} to={a.to}
+              className={`${a.color} rounded-2xl p-4 flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-md transition-all hover:-translate-y-0.5`}>
+              <Icon className={`w-5 h-5 ${a.text}`} />
+              <span className={`text-xs font-bold ${a.text}`}>{a.label}</span>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Active Bookings */}
-      {activeBookings.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-2xl p-5">
-          <h2 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" />
-            Active Service Dispatches
-          </h2>
-          <div className="space-y-3">
-            {activeBookings.map(bk => {
-              const hasPendingCR = bk.paymentStatus === 'additional_amount_requested' || 
-                (bk.changeRequests && bk.changeRequests.some(cr => cr.status === 'pending'));
-
-              return (
-                <div key={bk.id} className="p-4 bg-teal-50/50 border border-teal-200 rounded-xl space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <img src={bk.assignedWorker?.avatar} alt="" className="w-10 h-10 rounded-xl object-cover border border-teal-200" />
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">{bk.subServiceName}</p>
-                        <p className="text-xs text-gray-500">{bk.assignedWorker?.name} · {bk.address.area}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-bold px-2.5 py-1 bg-teal-700 text-white rounded-full whitespace-nowrap">
-                        {bk.status.replace(/_/g, ' ')}
-                      </span>
-                      <PaymentStatusBadge status={bk.paymentStatus} size="sm" />
-                    </div>
-                  </div>
-
-                  {/* Change Request Notification Banner */}
-                  {hasPendingCR && (
-                    <div className="p-3 bg-purple-100 border border-purple-300 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 text-xs text-purple-900 font-medium">
-                        <AlertTriangle className="w-4 h-4 text-purple-700 shrink-0" />
-                        <span>Worker requested additional scope & parts. No price increase is applied without your approval.</span>
-                      </div>
-                      <Link
-                        to="/customer/bookings"
-                        className="px-3 py-1 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded-lg shadow-xs transition-colors shrink-0"
-                      >
-                        Review Request →
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+      {active.length > 0 && (
+        <div className="bg-white border border-surface-200 rounded-3xl shadow-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-surface-100">
+            <h2 className="text-sm font-black text-surface-900 font-display">Active Bookings</h2>
+            <Link to="/customer/bookings" className="text-xs font-bold text-coop-700 hover:underline flex items-center gap-1">
+              View all <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-        </div>
-      )}
-
-      {/* Quick Actions */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-5">
-        <h2 className="text-sm font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: 'Book Service', icon: Wrench, to: '/customer/book', color: 'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100' },
-            { label: 'My Bookings', icon: ClipboardList, to: '/customer/bookings', color: 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100' },
-            { label: 'Payments', icon: CreditCard, to: '/customer/payments', color: 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100' },
-            { label: 'My Profile', icon: User, to: '/customer/profile', color: 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100' },
-          ].map(a => {
-            const Icon = a.icon;
-            return (
-              <Link key={a.label} to={a.to} className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border text-center text-xs font-bold transition-colors ${a.color}`}>
-                <Icon className="w-6 h-6" />
-                <span>{a.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Recent Completed */}
-      {completedBookings.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-gray-900">Recent Services</h2>
-            <Link to="/customer/bookings" className="text-xs font-semibold text-green-600 hover:underline">View All</Link>
-          </div>
-          <div className="space-y-2">
-            {completedBookings.slice(0, 3).map(bk => (
-              <div key={bk.id} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50">
-                <div className="flex items-center gap-3">
-                  <img src={bk.assignedWorker?.avatar} alt="" className="w-8 h-8 rounded-lg object-cover" />
-                  <div>
-                    <p className="text-xs font-semibold text-gray-900">{bk.subServiceName}</p>
-                    <p className="text-[10px] text-gray-500">{bk.date} · {bk.assignedWorker?.name}</p>
+          <div className="divide-y divide-surface-50">
+            {active.slice(0, 3).map((b: any) => (
+              <div key={b._id} className="px-5 py-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-black text-surface-900 font-mono">{b.bookingNumber}</p>
+                  <p className="text-sm font-semibold text-surface-700">{b.serviceCategory}</p>
+                  <div className="flex items-center gap-2 text-[10px] text-surface-400 mt-1">
+                    <MapPin className="w-3 h-3" />{b.address?.area}
+                    <Clock className="w-3 h-3 ml-1" />{b.scheduledDate}
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-bold text-gray-900">₹{bk.paymentBreakdown.totalAmount}</p>
-                  <span className="text-[10px] text-green-600 font-semibold">Paid</span>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${
+                    b.status === 'IN_PROGRESS' ? 'bg-purple-100 text-purple-700' :
+                    b.status === 'EN_ROUTE' ? 'bg-cyan-100 text-cyan-700' :
+                    b.status === 'ALLOCATED' ? 'bg-blue-100 text-blue-700' :
+                    'bg-amber-100 text-amber-700'
+                  }`}>{b.status?.replace(/_/g,' ')}</span>
+                  <p className="text-sm font-black text-surface-900 mt-1">₹{b.totalAmount}</p>
                 </div>
               </div>
             ))}
@@ -150,16 +101,46 @@ export const CustomerDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Cooperative banner */}
-      <div className="bg-gray-900 rounded-2xl p-5 flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-bold text-white mb-1">Your booking supports cooperative workers</p>
-          <p className="text-xs text-gray-400">Every ₹100 paid: ₹80 to worker, ₹5 welfare, ₹10 cooperative, ₹5 ops</p>
+      {/* Recent Completed */}
+      {completed.length > 0 && (
+        <div className="bg-white border border-surface-200 rounded-3xl shadow-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-surface-100">
+            <h2 className="text-sm font-black text-surface-900 font-display">Completed Services</h2>
+            <Link to="/customer/bookings" className="text-xs font-bold text-coop-700 hover:underline">View all</Link>
+          </div>
+          <div className="divide-y divide-surface-50">
+            {completed.slice(0, 3).map((b: any) => (
+              <div key={b._id} className="px-5 py-3 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-surface-800">{b.serviceCategory}</p>
+                  <p className="text-[10px] text-surface-400">{b.scheduledDate}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-emerald-600">₹{b.totalAmount}</span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <Link to="/how-it-works" className="shrink-0 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors">
-          Learn More
-        </Link>
-      </div>
+      )}
+
+      {/* Empty state */}
+      {bookings.length === 0 && !loading && (
+        <div className="text-center py-16 space-y-4">
+          <div className="w-16 h-16 rounded-3xl bg-coop-100 flex items-center justify-center mx-auto">
+            <Briefcase className="w-8 h-8 text-coop-700" />
+          </div>
+          <div>
+            <h3 className="text-base font-black text-surface-900 font-display">No bookings yet</h3>
+            <p className="text-xs text-surface-400 mt-1">Book your first cooperative service today</p>
+          </div>
+          <Link to="/customer/book"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-coop-900 text-white text-sm font-bold rounded-2xl hover:bg-coop-800 transition-colors shadow-md">
+            <Plus className="w-4 h-4" />Book a Service
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

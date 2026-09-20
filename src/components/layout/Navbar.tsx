@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Globe, ChevronDown, Menu, X, Leaf, Check } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Globe, ChevronDown, Menu, X, Leaf, Check, LogOut, LayoutDashboard } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import type { SupportedLanguage } from '../../data/mockTranslations';
 
 const LANGUAGES: { code: SupportedLanguage; label: string; subLabel: string }[] = [
@@ -12,10 +13,15 @@ const LANGUAGES: { code: SupportedLanguage; label: string; subLabel: string }[] 
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
+  const { authUser, isAuthenticated, logout, appRole } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = () => { logout(); navigate('/login'); };
+  const dashboardPath = appRole === 'worker' ? '/worker/dashboard' : appRole === 'admin' ? '/admin/dashboard' : '/customer/dashboard';
 
   // Close language dropdown on outside click
   useEffect(() => {
@@ -132,21 +138,32 @@ export const Navbar: React.FC = () => {
               )}
             </div>
 
-            {/* Login (Outline Button) */}
-            <Link
-              to="/login"
-              className="hidden sm:inline-flex items-center justify-center px-5 py-2 border border-gray-300 hover:border-gray-400 text-gray-800 text-xs font-bold rounded-xl transition-all hover:bg-gray-50"
-            >
-              {t.nav.login}
-            </Link>
-
-            {/* Sign Up (Solid Green Button) */}
-            <Link
-              to="/signup"
-              className="inline-flex items-center justify-center px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs"
-            >
-              {t.nav.signup}
-            </Link>
+            {/* Auth: logged in user OR Login/Signup */}
+            {isAuthenticated && authUser ? (
+              <div className="hidden sm:flex items-center gap-2">
+                <Link to={dashboardPath}
+                  className="flex items-center gap-2 px-3.5 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-800 text-xs font-bold rounded-xl transition-colors">
+                  <div className="w-5 h-5 rounded-full bg-teal-700 flex items-center justify-center text-white text-[10px] font-black">{authUser.name.charAt(0)}</div>
+                  <span className="max-w-[80px] truncate">{authUser.name}</span>
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                </Link>
+                <button onClick={handleLogout}
+                  className="p-2 rounded-xl text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors border border-gray-200" title="Logout">
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link to="/login"
+                  className="hidden sm:inline-flex items-center justify-center px-5 py-2 border border-gray-300 hover:border-gray-400 text-gray-800 text-xs font-bold rounded-xl transition-all hover:bg-gray-50">
+                  {t.nav.login}
+                </Link>
+                <Link to="/signup"
+                  className="inline-flex items-center justify-center px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs">
+                  {t.nav.signup}
+                </Link>
+              </>
+            )}
 
             {/* Mobile Hamburger */}
             <button
@@ -199,22 +216,25 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* Mobile Auth Links */}
-            <div className="pt-2 grid grid-cols-2 gap-2">
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="py-2.5 text-center text-xs font-bold border border-gray-300 rounded-xl text-gray-800"
-              >
-                {t.nav.login}
-              </Link>
-              <Link
-                to="/signup"
-                onClick={() => setMenuOpen(false)}
-                className="py-2.5 text-center text-xs font-bold bg-teal-700 text-white rounded-xl"
-              >
-                {t.nav.signup}
-              </Link>
-            </div>
+            {isAuthenticated && authUser ? (
+              <div className="pt-2 grid grid-cols-2 gap-2">
+                <Link to={dashboardPath} onClick={() => setMenuOpen(false)}
+                  className="py-2.5 text-center text-xs font-bold bg-teal-700 text-white rounded-xl flex items-center justify-center gap-1.5">
+                  <LayoutDashboard className="w-3.5 h-3.5" />My Portal
+                </Link>
+                <button onClick={() => { handleLogout(); setMenuOpen(false); }}
+                  className="py-2.5 text-center text-xs font-bold border border-red-200 text-red-600 rounded-xl flex items-center justify-center gap-1.5">
+                  <LogOut className="w-3.5 h-3.5" />Logout
+                </button>
+              </div>
+            ) : (
+              <div className="pt-2 grid grid-cols-2 gap-2">
+                <Link to="/login" onClick={() => setMenuOpen(false)}
+                  className="py-2.5 text-center text-xs font-bold border border-gray-300 rounded-xl text-gray-800">{t.nav.login}</Link>
+                <Link to="/signup" onClick={() => setMenuOpen(false)}
+                  className="py-2.5 text-center text-xs font-bold bg-teal-700 text-white rounded-xl">{t.nav.signup}</Link>
+              </div>
+            )}
           </div>
         )}
       </div>
