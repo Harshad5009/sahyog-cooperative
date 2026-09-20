@@ -9,6 +9,7 @@ import bookingRoutes from './routes/bookings';
 import workerRoutes from './routes/workers';
 import sosRoutes from './routes/sos';
 import adminRoutes from './routes/admin';
+import seedRoute from './routes/seed';
 
 // Ensure all Mongoose models are registered in runtime
 import './models/User';
@@ -63,6 +64,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/workers', workerRoutes);
 app.use('/api/sos', sosRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/seed', seedRoute); // Protected by SEED_SECRET env var
 
 // ── 404 + Error handler ────────────────────────────────────
 app.use(notFound);

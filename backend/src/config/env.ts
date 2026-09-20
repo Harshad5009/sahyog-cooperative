@@ -25,4 +25,5 @@ export const env = {
 
   // Seed
   SEED_ADMIN_PHONE: process.env.SEED_ADMIN_PHONE ?? '9800000000',
+  SEED_SECRET: process.env.SEED_SECRET ?? '',
 };
