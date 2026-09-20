@@ -3,7 +3,13 @@
  * Centralised Axios instance that attaches JWT tokens and handles 401 refresh.
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
+const defaultProdApi = 'https://sahyog-backend1.onrender.com/api';
+const rawApiUrl = import.meta.env.VITE_API_URL;
+const isProdHost = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+
+const BASE_URL = (rawApiUrl && rawApiUrl !== 'https://sahyog-backend.onrender.com/api')
+  ? rawApiUrl
+  : (isProdHost ? defaultProdApi : 'http://localhost:5000/api');
 
 const getAccessToken = () => localStorage.getItem('sahyog_access_token');
 const getRefreshToken = () => localStorage.getItem('sahyog_refresh_token');
