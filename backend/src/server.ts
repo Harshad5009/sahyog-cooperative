@@ -7,8 +7,8 @@ const PORT = env.PORT;
 const start = async () => {
   await connectDB();
 
-  const server = app.listen(PORT, () => {
-    console.log(`\n✅  SAHYOG API running on http://localhost:${PORT}`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n✅  SAHYOG API running on http://0.0.0.0:${PORT}`);
     console.log(`📋  Environment : ${env.NODE_ENV}`);
     console.log(`🗄️   MongoDB     : ${env.MONGODB_URI.replace(/\/\/.*@/, '//***@')}`);
     console.log(`🩺  Health      : http://localhost:${PORT}/health\n`);
